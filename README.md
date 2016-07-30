@@ -6,7 +6,7 @@ redBlocks: Filtering differential expression results for common co-expression pa
 
 ### Summary
 
-![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/freq_tally.png "Method summary")
+![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/freq_tally_net.png "Method summary")
 
 #################################################################################################
 ### 1. Setting up the environment
