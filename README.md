@@ -6,7 +6,10 @@ redBlocks: Filtering differential expression results for common co-expression pa
 
 ### Summary
 
-![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/freq_tally_net.png "Method summary")
+![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/summary_method.png "Method summary")
+
+
+![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/summary_DE.png "Method summary")
 
 #################################################################################################
 ### 1. Setting up the environment
@@ -16,6 +19,9 @@ You first need to label the directory you have saved redBlocks in: eg. ``` maste
 And label your experiment: eg. ``` name = "my_experiment" ```
 All output will be saved in: ``` out = paste(masterdir,name,sep="/") ```
 You will also need to download the frequency tally network data from this link: ```  ```.
+
+![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/freq_tally_net.png "Method summary")
+
 
 #################################################################################################
 ### 2. Expression data
