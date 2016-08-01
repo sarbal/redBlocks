@@ -145,10 +145,11 @@ calc_DE <- function(X, f.a, filt, group){
 	return(de)
 }
 
-calc_DE_filter <- function(X, f.a, filt,group){
-        keep <- rowSums(X>1) >= 2
-	X = X[keep,filt]
+calc_DE_filter <- function(X, f.a, filt, group,  ftr, mtr, top){
+	X = X[f.a,filt]
 	group = group[filt]
+	
+
   	if( sum(group==1) < 2  ) {
            	m.X1 = (X[,group==1])
 	} else {
@@ -164,9 +165,25 @@ calc_DE_filter <- function(X, f.a, filt,group){
 	X.ps = sapply(1:dim(X)[1], function(k) wilcox.test(X[k,group==1], X[k,group==2])$p.val)
 	X.padj = p.adjust(X.ps , method = "BH")
 	de = cbind(m.X, fc, X.ps, X.padj, m.X1, m.X2)
+
+	# Filter variable genes
+	fc.mtr = log2( rowMeans(as.matrix(X[,ftr]))/rowMeans(as.matrix(X[,mtr])) )
+	fc.ftr = log2( rowMeans(as.matrix(X[,mtr]))/rowMeans(as.matrix(X[,ftr])) )
+
+	deg.ftr.up   = tail(order( fc.ftr[f.a] ), n=top)
+	deg.mtr.up   = tail(order( fc.mtr[f.a] ), n=top)
+	deg.fam.up   = tail(order( fc[f.a] ), n=top)
+	deg.ftr.up   = head(order( fc.ftr[f.a] ), n=top)
+	deg.mtr.up   = head(order( fc.mtr[f.a] ), n=top)
+	deg.fam.up   = head(order( fc[f.a] ), n=top)
+
+	f.vg = c(intersect(deg.mtr.down, deg.fam.down), intersect(deg.mtr.up, deg.fam.up),
+                 intersect(deg.ftr.down, deg.fam.down), intersect(deg.ftr.up, deg.fam.up))
+
+        de[f.vg,2] = 0
+
 	return(de)
 }
-
 
 
 plot_deg_coexp <- function(deg, flag, runid, filtMin=5, freq.net){
