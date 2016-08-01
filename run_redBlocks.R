@@ -8,16 +8,19 @@ X = counts
 X.cpm = calc_cpm(X)
 
 # Data filters
-f.a = row_filter
-file = col_filter
+# row_filter - already
+col_filter = c(prb, fam) # example, selecting all the probands and all the parents
+col_filter = labels[c(prb, fam),2]==1  # example, selecting  family 1 
+
 
 # Set up conditions here (1 - unaffected, 2 - affected)
-group = conditions
+group = as.numeric(labels[,6] == 1 ) + 1    
 
 # Run DE 
-deg.edgeR.filt = run_edgeR_filter(X, f.a, filt,group)
-deg.deseq.filt = run_DESeq2_filter(X,f.a,filt,group)
-deg.wilcox     = calc_DE(X.cpm+1,f.a,filt,2-group)
+deg.edgeR.filt = run_edgeR_filter(X, row_filter, col_filter ,group)
+deg.deseq.filt = run_DESeq2_filter(X,row_filter, col_filter,group)
+deg.wilcox     = calc_DE(X.cpm+1,row_filter, col_filter,2-group)
+
 
 # Filter DE results for common co-expression
 edgeR.results = plot_deg_coexp(deg.edgeR.filt, "edgeR", runid, filtMin=5, freq.net)
