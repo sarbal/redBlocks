@@ -42,8 +42,8 @@ Other methods can be used.
 #################################################################################################
 
 Once the environment variables and the expression data is loaded, you can run the
-script ``` run_redBlocks.R ``` :
-In an R session: ``` source("run_redBlocks_on_data.R") ``` 
+script ``` run_redBlocks.R ```. 
+
 
 
 #################################################################################################
