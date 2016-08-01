@@ -1,3 +1,62 @@
+# Load necessary libraries 
+library(DESeq2)
+library(edgeR)
+library(gplots)
+library(zoo)
+library(plyr)
+library(RColorBrewer)
+library(ape)
+library(dynamicTreeCut)
+
+
+cols = colorpanel(16, "red", "blue")
+cols2 = brewer.pal(8, "Spectral")
+cols3 = rainbow(30)
+cols4 = colorpanel(63, "grey", "blue", "darkblue")
+cols5 = colorpanel(300, "grey", "red", "darkred")
+cols6 = colorpanel(30, "grey", "red", "darkmagenta")
+cols7 = c("seagreen", "black", "darkmagenta")
+
+
+# Transparent colors
+makeTransparent<-function(someColor, alpha=100)
+{
+	newColor<-col2rgb(someColor)
+	apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2],
+	blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
+}
+
+heatmap.3 <- function(mat, ...){
+	heatmap.2( mat, ..., density="none", trace="none")
+}
+
+
+
+ colSD <- function( data){
+ 	return(apply( data, 2, sd, na.rm=T)  )
+
+ }
+
+ rowSD <- function( data){
+ 	return(apply( data, 1, sd, na.rm=T)  )
+
+ }
+
+
+ colSE <- function( data){
+ 	return( apply( data, 2, sd, na.rm=T)/sqrt(dim(data)[2])  )
+
+ }
+
+ rowSE <- function( data){
+ 	return( apply( data, 1, sd, na.rm=T)/sqrt(dim(data)[1])  )
+
+ }
+
+
+
+
+
 # Helper functions 
 make_net_mat <- function(data, n, genes, filt){
 	net = diag(n) * 0
