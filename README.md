@@ -18,7 +18,7 @@ redBlocks: Filtering differential expression results for common co-expression pa
 You first need to label the directory you have saved redBlocks in: eg. ``` masterdir="C:/redBlocks/" ```
 And label your experiment: eg. ``` name = "my_experiment" ```
 All output will be saved in: ``` out = paste(masterdir,name,sep="/") ```
-You will also need to download the frequency tally network data from this link: ```  ```.
+You will also need to download the frequency tally network data from this link: ``` https://www.dropbox.com/s/vlt88gjazx3c0qp/freq.75.net.Rdata?dl=0 ```.
 
 ![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/freq_tally_net.png "Method summary")
 
@@ -50,13 +50,5 @@ In an R session: ``` source("run_redBlocks_on_data.R") ```
 ### 4. Output summary
 #################################################################################################
 
-![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/output.png "Method summary")
+![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/summary_output.png "Method summary")
 
-#################################################################################################
-### 5. Intepreting results
-#################################################################################################
-
-
-#################################################################################################
-### 6. Extras
-#################################################################################################
