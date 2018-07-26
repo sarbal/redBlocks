@@ -4,12 +4,7 @@ redBlocks: Filtering differential expression results for common co-expression pa
 
 
 ### Summary
-
 ![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/summary_method.png "Method summary")
-
-
-![summary](https://github.com/sarbal/redBlocks/blob/master/imgs/summary_DE.png "Method summary")
-
 
 ### 1. Setting up the environment
 You first need to label the directory you have saved redBlocks in: eg. ``` masterdir="C:/redBlocks/" ```
