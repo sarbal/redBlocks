@@ -2,7 +2,6 @@
 
 redBlocks: Filtering differential expression results for common co-expression pairs
 
-========
 
 ### Summary
 
