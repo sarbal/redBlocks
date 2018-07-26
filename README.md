@@ -16,15 +16,13 @@ You will also need to download the frequency tally network data from this link: 
 
 
 ### 2. Expression data
-#### a. To run redBlocks, you need a read counts dataset.
+To run redBlocks, you need a read counts dataset.
 Currently, we have not implemented any pre-processing steps, so please make sure that the data is
 set up as a matrix, with columns as your individual samples, and rows as genes.
 The row names should be labelled by their gene entrez IDs.
 The columns should be labelled by their sample IDs.
 The expression dataset should be placed in the variable: ``` counts ``` 
-
-#### b. Alternatively, you can use your DE output from either edgeR or DESeq2. 
-Other methods can be used. 
+Alternatively, you can use your DE output from either edgeR or DESeq2. The input needs to be a list of differentially expressed genes.  
 
 ### 3. Running redBlocks
 Once the environment variables and the expression data is loaded, you can run the
