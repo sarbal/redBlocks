@@ -1,14 +1,25 @@
 # Plot figures
+source("Z:useful3.r")
+require(tidyverse)
+require(plyr)
+require(pheatmap)
 
-
-
-################# 
+#################
 ###  Figure 3 ###
 #################
 
 #### Panel A
-load("summary.deg.Rdata")
+load("../figures/fig3.panelA.Rdata")
+pdf("../figures/fig3.panelA.gene.recur.pdf")
+heatmap.3(up.plot, Colv=F, col=rev(viridis(100)), Rowv=F, RowSideCol=rev(magma(6))[up.bar], main="Up")
+heatmap.3(down.plot, Colv=F, col=rev(viridis(100)), Rowv=F, RowSideCol=rev(magma(6))[down.bar], main="Down")
+leg2 = cbind(rev(magma(6)), 1:6)
+plot(0,1)
+legend( "bottom", leg=leg2[,2], col=leg2[,1], lwd=3 )
+dev.off()
 
+# To reproduce analysis:
+load("taf1_pedigrees/summary.deg.Rdata")
 fcc = c(7:9,12,11,10)
 all = unique(array(sapply(fcc, function(i) head(order(genesets.fcranks[,i]), n=100 ))  ))
 freq = count(array(sapply(fcc, function(i) head(order(genesets.fcranks[,i]), n=100 ))  ))
@@ -25,22 +36,19 @@ up.plot = 1- (genesets.fcranks[all,fcc][om,]/dim(genesets.fcranks)[1])
 up.bar = freq[m,2][om]
 
 leg2 = cbind(rev(magma(6)), 1:6)
-
-pdf("fig3.panelA.gene.recur.pdf")
-heatmap.3(up.plot, Colv=F, col=rev(viridis(100)), Rowv=F, RowSideCol=rev(magma(6))[up.bar])
-heatmap.3(down.plot, Colv=F, col=rev(viridis(100)), Rowv=F, RowSideCol=rev(magma(6))[down.bar])
-leg2 = cbind(rev(magma(6)), 1:6)
-plot(0,1)
-legend( "bottom", leg=leg2[,2], col=leg2[,1], lwd=3 )
-dev.off()
-
-save( up.plot, down.plot, up.bar, down.bar, leg2, file="fig3.panelA.Rdata")
+save( up.plot, down.plot, up.bar, down.bar, leg2, file="../figures/fig3.panelA.Rdata")
 
 
 
 #### Panel B
-load("summary.deg.Rdata")
-load("taf1.DE.Rdata")
+load("../figures/fig3.panelB.Rdata")
+pdf("../figures/fig3.panelB.common.overlaps.pdf")
+heatmap.3(mat.comb, col=cols, Rowv=F, Colv=F, cellnote=sigtemp2, notecol="black", notecex=2 )
+dev.off()
+
+# To reproduce analysis:
+load("taf1_pedigrees/summary.deg.Rdata")
+load("taf1_pedigrees/taf1.DE.Rdata")
 reorder = c(1:3,6,5,4)
 down100overlaps = sapply(reorder, function(i) sapply(reorder, function(j) length(intersect(which(genes.down[,i]>0), which(genes.down[,j]>0) )) ) )
 up100overlaps = sapply(reorder, function(i) sapply(reorder, function(j)  length(intersect(which(genes.up[,i]>0), which(genes.up[,j]>0) )) ) )
@@ -80,14 +88,19 @@ sigtemp[sigtemp==1] = "*"
 sigtemp[sigtemp==0] = ""
 sigtemp2 = matrix(paste(count.comb, sigtemp), ncol=6 )
 
+save(mat.comb, sigtemp2, file="../figures/fig3.panelB.Rdata")
 
-pdf("fig3.panelB.common.overlaps.pdf")
-heatmap.3(mat.comb, col=cols, Rowv=F, Colv=F, cellnote=sigtemp2, notecol="black", notecex=2 )
-dev.off()
-
-save(mat.comb, sigtemp2, file="fig3.panelB.Rdata")
 
 #### Panel C
+load("../figures/fig3.panelC.Rdata")
+pdf("../figures/fig3.panelC.hist.pdf")
+hist( recur.u[recur.u>0]+0.01 , col=cols.rec[2], main="Recurrence, up", xlab="Count",xlim=c(1,4))
+abline( v = fdrs.up$Pt)
+hist( recur.d[recur.d>0]+0.01 , col=cols.rec[3], main="Recurrence, down", xlab="Count",xlim=c(1,4))
+abline( v = fdrs.down$Pt)
+dev.off()
+
+# To reproduce analysis:
 load("analysis/fdr_calcs.genes.up.Rdata")
 fdrs.up = fdrs
 load("analysis/fdr_calcs.genes.down.Rdata")
@@ -96,52 +109,70 @@ load("taf1.DE.Rdata")
 recur.d = rowSums(genes.down)
 recur.u = rowSums(genes.up)
 cols.rec  =c(magma(5)[2], "deeppink4", "darkcyan" )
-
-
-pdf("fig3.panelC.hist.pdf")
-hist( recur.u[recur.u>0]+0.01 ,    col=cols.rec[2], main="Recurrence, up", xlab="Count",xlim=c(1,4))
-abline( v = fdrs.up$Pt)
-hist( recur.d[recur.d>0]+0.01 ,    col=cols.rec[3], main="Recurrence, down", xlab="Count",xlim=c(1,4))
-abline( v = fdrs.down$Pt)
-dev.off()
-
-save( recur.u ,recur.d, fdrs.down, fdrs.up, file="fig3.panelC.Rdata")
+save(cols.rec, recur.u ,recur.d, fdrs.down, fdrs.up, file="../figures/fig3.panelC.Rdata")
 
 
 #### Panel D
-*** TO DO
+load("../figures/fig3.panelD.Rdata")
+pdf("../figures/fig3.panelD.pdf")
+plot_recurrence(xrange, n.sig.rec.up, p.tests.up, main="Up", xlab="Number of DE genes", ylab="Number of genes significantly recurrent")
+plot_recurrence(xrange, n.sig.rec.down, p.tests.down,main="Down", xlab="Number of DE genes", ylab="Number of genes significantly recurrent")
+dev.off()
+
+# To reproduce analyses:
+plot_recurrence <- function(xrange, n.sig, p.tests, ...){
+      plot( xrange , n.sig , type="l", lwd=2, axes=F, ...)
+      axis(1); axis(2);
+      par(new=TRUE)
+      plot( xrange , -log10(p.tests) , type="l",   axes=F, col="lightgrey", ylab="", xlab="")
+      axis(4); mtext("-log10 adjusted P-value of significance threshold",4)
+}
+
+load("../taf1_pedigrees/p.recur.pre.Rdata")
+xrange = 10:1000
+p.max = 0.05
+n.sig.rec.up = sapply(xrange-9, function(i)  sum(p.recur.up[[i]][p.recur.up[[i]][,2]  <= p.max,3]) )
+n.sig.rec.down = sapply(xrange-9, function(i)  sum(p.recur.down[[i]][p.recur.down[[i]][,2]  <= p.max,3]) )
+p.tests.up = sapply(xrange-9, function(i)   p.recur.up[[i]][p.recur.up[[i]][,2]  <= p.max,2][1] )
+p.tests.down = sapply(xrange-9, function(i) p.recur.down[[i]][p.recur.down[[i]][,2]  <= p.max,2][1])
+
+save(p.tests.down, p.tests.up,n.sig.rec.down, n.sig.rec.up ,p.max ,xrange , plot_recurrence, file="../figures/fig3.panelD.Rdata")
 
 #################
 ###  Figure 4 ###
 #################
 #### Panel A
+
+pdf("../figures/fig4.panelA.pdf")
+dev.off()
+
+save(up.path, down.path, file="fig4.panelA.Rdata")
+
+#### Panel B
+pdf("../figures/fig4.panelB.pdf")
+dev.off()
+save(recur.up.path,  fdrs.up , file="../figures/fig4.panelA.Rdata")
+
+#### Panel C
+pdf("../figures/fig4.panelC.pdf")
+dev.off()
+save(recur.up.path,  fdrs.up , file="../figures/fig4.panelC.Rdata")
+
+#### Panel D
+pdf("../figures/fig4.panelD.pdf")
+dev.off()
+save( file="../figures/fig4.panelD.Rdata")
+
+#### Panel E
+pdf("../figures/fig4.panelD.pdf")
+dev.off()
+save( , file="../figures/fig4.panelE.Rdata")
+
+# To reproduce analysis:
 load("analysis/fdr_calcs.goslim.paths.all.Rdata")
 load("analysis/summary.goslim.paths.Rdata")
 load("analysis/summary.goslim.paths.recurs.Rdata")
 load("analysis/goslim.summary2genes.Rdata")
-pdf("fig4.panelA.pdf")
-dev.off()
-
-save(up.path, down.path, file="fig4.panelA.Rdata")
-#### Panel B
-pdf("fig4.panelB.pdf")
-dev.off()
-save(recur.up.path,  fdrs.up , file="fig4.panelA.Rdata")
-
-#### Panel C
-pdf("fig4.panelC.pdf")
-dev.off()
-save(recur.up.path,  fdrs.up , file="fig4.panelC.Rdata")
-
-#### Panel D
-pdf("fig4.panelD.pdf")
-dev.off()
-save( file="fig4.panelD.Rdata")
-
-#### Panel E
-pdf("fig4.panelD.pdf")
-dev.off()
-save( , file="fig4.panelE.Rdata")
 
 
 #################
@@ -149,7 +180,17 @@ save( , file="fig4.panelE.Rdata")
 #################
 
 #### Panel A
-load("1adj.tally_75.subnet.down1000.Rdata")
+# To plot panel:
+load("../figures/fig5.panelA2.Rdata")
+load("../figures/fig5.panelA.Rdata")
+pdf("../figures/fig5.panelA.heatmap.f1.pdf")
+heatmap.2(n.coexp, col=viridis(100), density="none", trace="none", Rowv=consDend, Colv=consDend, RowSideColors=unmergedColors3, ColSideColors=unmergedColors3,cexRow=0.5, cexCol=0.5, main="Downregulated genes")
+heatmap.3( cbind(go.figslim, go.msig), col=cols6, Rowv=consDend, ,Colv=F, RowSideColors=unmergedColors3, ColSideCol =cols4b[c(col.figslim, col.msig)], cexRow=0.5, cexCol=0.5, main="")
+heatmap.3( cbind(go.figslim2, go.msig2), col=cols6, Rowv=consDend, ,Colv=F, RowSideColors=unmergedColors3, ColSideCol =cols4b[c(col.figslim, col.msig)], cexRow=0.5, cexCol=0.5, main="")
+dev.off()
+
+# To reproduce analysis:
+load("taf1_pedigrees/1adj.tally_75.subnet.down1000.Rdata")
 n.coexp = subnet[1:100,1:100]
 medK = 0.28
 filtMin=6
@@ -162,149 +203,240 @@ unmergedLabels3 = cutreeDynamic(dendro = consTree, distM = temp, deepSplit = 2, 
 nsclust = as.numeric(unmergedLabels3)+1
 unmergedColors3 = magma( max(nsclust))[nsclust]
 n.coexp = 1-n.coexp
+save(n.coexp, consDend, unmergedColors3 , file="../figures/fig5.panelA.Rdata")
 
-pdf("fig5.panelA.heatmap.f1.pdf")
-heatmap.2(n.coexp, col=viridis(100), density="none", trace="none", Rowv=consDend, Colv=consDend, RowSideColors=unmergedColors3, ColSideColors=unmergedColors3,cexRow=0.5, cexCol=0.5, main="Downregulated genes")
-dev.off()
-save(n.coexp, consDend, unmergedColors3 , file="fig5.panelA.Rdata")
+
 
 #### Panel B
-load("analysis/taf.recur.filt.up.genes.Rdata")
-load("analysis/taf.recur.filt.down.genes.Rdata")
-recurs = cbind( recur.u*0, recur.u*0, recur.u, recur.u.filt, recur.d , recur.d.filt)
-load("analysis/fdr_calcs.filt.genes.down.Rdata")
-load("analysis/fdr_calcs.filt.genes.up.Rdata")
-fdrs.up.filt = fdrs.up
-fdrs.down.filt = fdrs.down
-load("fdr_calcs.genes.down.Rdata")
-load("fdr_calcs.genes.up.Rdata")
-pt.all = cbind(0,0, fdrs.up$Pt,fdrs.up.filt$Pt , fdrs.down$Pt, fdrs.down.filt$Pt)
-
-
-
-temp1 = recurs[,c(4,3)]
-temp = plyr::count( temp1)
-temp.mat = spread(temp, key=x.recur.u.filt, value=freq)
-rownames(temp.mat) = temp.mat[,1]
-temp.mat = temp.mat[,-1]
-temp.mat[is.na(temp.mat)] = 0
-temp.mat = as.matrix(temp.mat )
-
-temp.mat10 =   log10(temp.mat )  + 1
-temp.mat10[!is.finite(temp.mat10)] = 0
-Pt.pre = pt.all[3]
-Pt.post = pt.all[4]
-
-
-pdf("fig5.panelB.up.pdf")
-image(  temp.mat10, col=cols11, axes=F, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering" )
-n=dim( temp.mat)[2] -1
-ni = diff((0:n/n))[1]
-abline( h= (0:n/n)[Pt.post]+ni/2, lwd=3, col="grey")
-axis(2, at=0:n/n, lab=0:n)
-n=dim( temp.mat)[1] -1
-ni = diff((0:n/n))[1]
-axis(1, at=0:n/n, lab=(0:n)  )
-abline( v= (0:n/n)[Pt.pre]+ni/2, lwd=3, col="grey")
-heatmap.3(temp.mat10, col=cols11)
+load("analysis/summary.gene.recurs.int.Rdata")
+run_recur_compare(recurs,pt.all,  "../figures/fig5.panelB.Rdata")
+load("../figures/fig5.panelB.Rdata")
+pdf("../figures/fig5.panelB.pdf")
+plot_2D_hist (up.mat10, Pt.pre.up, Pt.post.up, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
+plot_2D_hist (down.mat10, Pt.pre.down, Pt.post.down, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
 dev.off()
-
-
-temp1 = recurs[,c(6,5)]
-temp = plyr::count( temp1)
-temp.mat = spread(temp, key=x.recur.d.filt, value=freq)
-rownames(temp.mat) = temp.mat[,1]
-temp.mat = temp.mat[,-1]
-temp.mat[is.na(temp.mat)] = 0
-temp.mat = as.matrix(temp.mat )
-
-temp.mat10 =   log10(temp.mat )  + 1
-temp.mat10[!is.finite(temp.mat10)] = 0
-Pt.pre = pt.all[5]
-Pt.post = pt.all[6]
-
-pdf("fig5.panelB.down.pdf")
-image(  temp.mat10, col=cols11, axes=F, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering" )
-n=dim( temp.mat)[2] -1
-ni = diff((0:n/n))[1]
-abline( h= (0:n/n)[Pt.post]+ni/2, lwd=3, col="grey")
-axis(2, at=0:n/n, lab=0:n)
-n=dim( temp.mat)[1] -1
-ni = diff((0:n/n))[1]
-axis(1, at=0:n/n, lab=(0:n)  )
-abline( v= (0:n/n)[Pt.pre]+ni/2, lwd=3, col="grey")
-heatmap.3(temp.mat10, col=cols11)
-dev.off()
-
 
 #### Panel C
+load("../figures/fig5.panelC.Rdata")
+pdf("../figures/fig5.panelC.pdf")
 
- 
+
+dev.off()
+
+
+
 
 #################
 ###  Figure 6 ###
 #################
 #### Panel A
+library(tidyverse)
+library(plyr)
+load("../fig6.panelA.Rdata")
+pdf("../fig6.panelA.pdf")
+plot_2D_hist (up.mat10, Pt.pre.up, Pt.post.up, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
+plot_2D_hist (down.mat10, Pt.pre.down, Pt.post.down, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
+dev.off()
 
 #### Panel B
+load("../fig6.panelB.Rdata")
+pdf("../fig6.panelB.pdf")
+plot_2D_hist (up.mat10, Pt.pre.up, Pt.post.up, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
+plot_2D_hist (down.mat10, Pt.pre.down, Pt.post.down, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
+dev.off()
 
 #### Panel C
+load("../fig6.panelC.Rdata")
+pdf("../fig6.panelC.pdf")
+plot_2D_hist (up.mat10, Pt.pre.up, Pt.post.up, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
+plot_2D_hist (down.mat10, Pt.pre.down, Pt.post.down, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
+dev.off()
 
- 
-# for each disease: 
-temp1 = recurs[,c(4,3)]
-temp = plyr::count( temp1)
-temp.mat = spread(temp, key=x.recur.u.filt, value=freq)
-rownames(temp.mat) = temp.mat[,1]
-temp.mat = temp.mat[,-1]
-temp.mat[is.na(temp.mat)] = 0
-temp.mat = as.matrix(temp.mat )
-
-temp.mat10 =   log10(temp.mat )  + 1
-temp.mat10[!is.finite(temp.mat10)] = 0
-Pt.pre = pt.all[3]
-Pt.post = pt.all[4]
+#### Venn insets 
 
 
-pdf("pre.post.filter.recur.up.pdf")
-image(  temp.mat10, col=cols11, axes=F, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering" )
-n=dim( temp.mat)[2] -1
-ni = diff((0:n/n))[1]
-abline( h= (0:n/n)[Pt.post]+ni/2, lwd=3, col="grey")
-axis(2, at=0:n/n, lab=0:n)
-n=dim( temp.mat)[1] -1
-ni = diff((0:n/n))[1]
-axis(1, at=0:n/n, lab=(0:n)  )
-abline( v= (0:n/n)[Pt.pre]+ni/2, lwd=3, col="grey")
-heatmap.3(temp.mat10, col=cols11)
+
+# To reproduce analysis:
+load("../HD/summary.gene.recurs.int.Rdata")
+run_recur_compare(recurs,pt.all, "../fig6.panelA.Rdata")
+
+load("../PD/summary.gene.recurs.int.Rdata")
+run_recur_compare(recurs, pt.all, "../fig6.panelB.Rdata")
+
+load("../SCZ/summary.gene.recurs.int.Rdata")
+run_recur_compare(recurs,pt.all,  "../fig6.panelC.Rdata")
+
+run_recur_compare <- function(recurs, pt.all, filename){
+      require(plyr)
+      require(tidyverse)
+      # Set up upregulated
+      temp1 = recurs[,c(4,3)]
+      temp = plyr::count( temp1)
+      temp.mat = spread(temp, key=x.recur.u.filt, value=freq)
+      rownames(temp.mat) = temp.mat[,1]
+      temp.mat = temp.mat[,-1]
+      temp.mat[is.na(temp.mat)] = 0
+      temp.mat = as.matrix(temp.mat )
+      
+      up.mat10 =   log10(temp.mat )  + 1
+      up.mat10[!is.finite(up.mat10)] = 0
+      Pt.pre.up = pt.all[3]
+      Pt.post.up = pt.all[4]
+      
+      
+      # Set up downregulated
+      temp1 = recurs[,c(6,5)]
+      temp = plyr::count( temp1)
+      temp.mat = spread(temp, key=x.recur.d.filt, value=freq)
+      rownames(temp.mat) = temp.mat[,1]
+      temp.mat = temp.mat[,-1]
+      temp.mat[is.na(temp.mat)] = 0
+      temp.mat = as.matrix(temp.mat )
+      
+      down.mat10 =   log10(temp.mat )  + 1
+      down.mat10[!is.finite(down.mat10)] = 0
+      Pt.pre.down = pt.all[5]
+      Pt.post.down = pt.all[6]
+      
+      save(up.mat10, Pt.pre.up, Pt.post.up, down.mat10, Pt.pre.down ,Pt.post.down, plot_2D_hist, file=filename)
+
+}
+
+plot_2D_hist <- function(mat,pt.x, pt.y, ...){
+    image( mat, axes=F, ... )
+    n=dim(mat)[2] -1
+    ni = diff((0:n/n))[1]
+    abline( h= (0:n/n)[pt.y]+ni/2, lwd=3, col="grey")
+    axis(2, at=0:n/n, lab=0:n)
+    n=dim( mat)[1] -1
+    ni = diff((0:n/n))[1]
+    axis(1, at=0:n/n, lab=(0:n)  )
+    abline( v= (0:n/n)[pt.x]+ni/2, lwd=3, col="grey")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Figure 4
+
+load("go.slim.Rdata")
+load("goslim.enrich.Rdata")
+k = 91
+go.down = sapply(1:6, function(i) go.pre.down2[[i]][,91] )
+go.up = sapply(1:6, function(i) go.pre.up2[[i]][,91] )
+ff = go.slim[,3] >= 5  & go.slim[,3] <= 4800
+rownames(go.up) = (go.slim[ff,1])
+rownames(go.down) = (go.slim[ff,1])
+colnames(go.up) = 1:6
+colnames(go.down) = 1:6
+
+
+fu = rowSums( 1* (go.up < 0.05 )) > 0
+fd = rowSums( 1* (go.down < 0.05 )) > 0
+
+sigtemp.up= (go.up[,] < 0.05) * 1
+sigtemp.up[sigtemp.up==1] = "*"
+sigtemp.up[sigtemp.up==0] = ""
+
+sigtemp.down= (go.down[,] < 0.05) * 1
+sigtemp.down[sigtemp.down==1] = "*"
+sigtemp.down[sigtemp.down==0] = ""
+
+heatmap.3( -log10(go.up), Colv=F, Rowv=F, col=cols9,cexRow = 0.7, cellnote=sigtemp.up, notecol="black", notecex=2 )
+heatmap.3( -log10(go.down), Colv=F, Rowv=F, col=cols9,cexRow = 0.7,  cellnote=sigtemp.down, notecol="black", notecex=2 )
+
+recur.pu = rowSums(go.up<0.05)
+recur.pd = rowSums(go.down<0.05)
+
+recur.up.col = c(0,rev(magma(6)))[recur.pu+1]
+recur.down.col = c(0,rev(magma(6)))[recur.pd+1]
+
+cols4b = colorpanel(5000, "lightgrey", "blue", "darkblue")
+
+col.size = go.slim[ff,3]
+
+o = order(go.slim[ff,3] )
+
+ou = order(go.slim[ff,3][fu] )
+od = order(go.slim[ff,3][fd] )
+
+pdf("figpathways_updated2.pdf")
+heatmap.3( -log10(go.up[fu,][ou,]), Colv=F,  Rowv=F, col=cols9,cexRow = 0.7, RowSideColors = cols4b[col.size][fu][ou], cellnote=sigtemp.up[fu,][ou,], notecol="black", notecex=2 )
+heatmap.3( -log10(go.down[fd,][od,]), Colv=F,  Rowv=F,  col=cols9,cexRow = 0.7, RowSideColors = cols4b[col.size][fd][od], cellnote=sigtemp.down[fd,][od,], notecol="black", notecex=2 )
+heatmap.3( -log10(go.up[fu,][ou,]), Colv=F,  Rowv=F, col=cols9,cexRow = 0.7, RowSideColors = recur.up.col[fu][ou], cellnote=sigtemp.up[fu,][ou,], notecol="black", notecex=2 )
+heatmap.3( -log10(go.down[fd,][od,]), Colv=F,  Rowv=F,  col=cols9,cexRow = 0.7, RowSideColors = recur.down.col[fd][od], cellnote=sigtemp.down[fd,][od,], notecol="black", notecex=2 )
+heatmap.3( cbind(col.size ,col.size ) , col=unique(cols4b))
 dev.off()
 
 
-temp1 = recurs[,c(6,5)]
-temp = plyr::count( temp1)
-temp.mat = spread(temp, key=x.recur.d.filt, value=freq)
-rownames(temp.mat) = temp.mat[,1]
-temp.mat = temp.mat[,-1]
-temp.mat[is.na(temp.mat)] = 0
-temp.mat = as.matrix(temp.mat )
 
-temp.mat10 =   log10(temp.mat )  + 1
-temp.mat10[!is.finite(temp.mat10)] = 0
-Pt.pre = pt.all[5]
-Pt.post = pt.all[6]
+load("Y:/human/RNAseq/outliers/TAF1/goslim.enrich.recur.Rdata")
+ff = go.slim[,3] >=5 & go.slim[,3] <= 4800
 
-pdf("pre.post.filter.recur.down.pdf")
-image(  temp.mat10, col=cols11, axes=F, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering" )
-n=dim( temp.mat)[2] -1
-ni = diff((0:n/n))[1]
-abline( h= (0:n/n)[Pt.post]+ni/2, lwd=3, col="grey")
-axis(2, at=0:n/n, lab=0:n)
-n=dim( temp.mat)[1] -1
-ni = diff((0:n/n))[1]
-axis(1, at=0:n/n, lab=(0:n)  )
-abline( v= (0:n/n)[Pt.pre]+ni/2, lwd=3, col="grey")
-heatmap.3(temp.mat10, col=cols11)
+recsigd =  which(padj.recur.down[ff,2] <0.05)
+recsigu =  which(padj.recur.up[ff,2] <0.05)
+sigrecu = which(recur.pu>=3)
+sigrecd = which(recur.pd>=3)
+fo = c(1,2,3,6,5,4)
+
+pdf("figpathredo.pdf")
+load("temp2slim.Rdata")
+library(pheatmap)
+f11 = order(gene.mat2[,1] ,gene.mat2[,2], gene.mat2[,3], gene.mat2[,6], gene.mat2[,5], gene.mat2[,4] )
+gene.mat2 = gene.mat2[f11,]
+gene.mat = gene.mat[f11,]
+m = match(rownames(gene.mat), rownames(annot.sub) )
+o1 = order(annot.sub[m,1] )
+o2 = order(annot.sub[m,2] )
+o3 = order(annot.sub[m,3] )
+o = o1
+rec2 = rowSums(gene.mat2)
+row_df = data.frame( cbind(annot.sub[m,][o,] + 1 , rec2[o]))
+row_df[,1] = as.factor(row_df[,1])
+row_df[,2] = as.factor(row_df[,2])
+row_df[,3] = as.factor(row_df[,3])
+row_df[,4] = as.factor(row_df[,4])
+
+rownames(row_df) = rownames(gene.mat2[o,])
+pheatmap((gene.mat2[o,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
+
+load("temp4slim.Rdata")
+f11 = order(gene.mat2[,1] ,gene.mat2[,2], gene.mat2[,3], gene.mat2[,6], gene.mat2[,5], gene.mat2[,4] )
+#o = order( -rowSums(gene.mat2))
+gene.mat2 = gene.mat2[f11,]
+gene.mat = gene.mat[f11,]
+m = match(rownames(gene.mat), rownames(annot.sub) )
+o1 = order(annot.sub[m,1] )
+o2 = order(annot.sub[m,2] )
+rec2 = rowSums(gene.mat2)
+row_df = data.frame(cbind(annot.sub[m,][o1,] + 1 , rec2[o1]))
+row_df[,1] = as.factor(row_df[,1])
+row_df[,2] = as.factor(row_df[,2])
+row_df[,3] = as.factor(row_df[,3])
+
+rownames(row_df) = rownames(gene.mat2[o1,])
+pheatmap((gene.mat2[o1,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
 
 dev.off()
 
- 
+
+
