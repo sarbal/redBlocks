@@ -1,0 +1,151 @@
+# Plot figures
+
+
+
+################# 
+###  Figure 3 ###
+#################
+
+#### Panel A
+load("summary.deg.Rdata")
+
+fcc = c(7:9,12,11,10)
+all = unique(array(sapply(fcc, function(i) head(order(genesets.fcranks[,i]), n=100 ))  ))
+freq = count(array(sapply(fcc, function(i) head(order(genesets.fcranks[,i]), n=100 ))  ))
+m = match( all, freq[,1])
+om = order(-freq[m,2])
+down.plot = genesets.fcranks[all,fcc][om,]/dim(genesets.fcranks)[1]
+down.bar = freq[m,2][om]
+
+freq = count(array(sapply(fcc, function(i) tail(order(genesets.fcranks[,i]), n=100 ))  ))
+all = unique(array(sapply(fcc, function(i) tail(order(genesets.fcranks[,i]), n=100 ))  ))
+m = match( all, freq[,1])
+om = order(-freq[m,2])
+up.plot = 1- (genesets.fcranks[all,fcc][om,]/dim(genesets.fcranks)[1])
+up.bar = freq[m,2][om]
+
+leg2 = cbind(rev(magma(6)), 1:6)
+
+pdf("fig3.panelA.gene.recur.pdf")
+heatmap.3(up.plot, Colv=F, col=rev(viridis(100)), Rowv=F, RowSideCol=rev(magma(6))[up.bar])
+heatmap.3(down.plot, Colv=F, col=rev(viridis(100)), Rowv=F, RowSideCol=rev(magma(6))[down.bar])
+leg2 = cbind(rev(magma(6)), 1:6)
+plot(0,1)
+legend( "bottom", leg=leg2[,2], col=leg2[,1], lwd=3 )
+dev.off()
+
+save( up.plot, down.plot, up.bar, down.bar, leg2, file="fig3.panelA.Rdata")
+
+
+
+#### Panel B
+load("summary.deg.Rdata")
+load("taf1.DE.Rdata")
+reorder = c(1:3,6,5,4)
+down100overlaps = sapply(reorder, function(i) sapply(reorder, function(j) length(intersect(which(genes.down[,i]>0), which(genes.down[,j]>0) )) ) )
+up100overlaps = sapply(reorder, function(i) sapply(reorder, function(j)  length(intersect(which(genes.up[,i]>0), which(genes.up[,j]>0) )) ) )
+
+up100overlaps.pvals = up100overlaps * 0
+down100overlaps.pvals = down100overlaps * 0
+
+for(i in 1:6){
+	for(j in 1:6){
+
+		q = up100overlaps[i,j] - 1
+		m = 100
+		n = dim(genesets.fcranks)[1] - m
+		k = 100
+		up100overlaps.pvals[i,j] = phyper(q, m, n , k, lower.tail = FALSE, log.p = FALSE)
+
+		q = down100overlaps[i,j] -1
+		m = 100
+		n = dim(genesets.fcranks)[1] - m
+		k = 100
+		down100overlaps.pvals[i,j] = phyper(q, m, n , k, lower.tail = FALSE, log.p = FALSE)
+	}
+}
+
+bot = row(down100overlaps.pvals) > col( down100overlaps.pvals )
+top  = row(down100overlaps.pvals) <  col( down100overlaps.pvals )
+mat.down = -log10(down100overlaps.pvals)
+mat.up = -log10(up100overlaps.pvals)
+mat.comb = mat.down * 0
+mat.comb[bot] =  -log10(p.adjust(down100overlaps.pvals[bot]))
+mat.comb[top] =  -log10(p.adjust(up100overlaps.pvals[top]))
+count.comb =  up100overlaps
+count.comb[bot] = down100overlaps[bot]
+diag(count.comb) = ""
+sigtemp = (mat.comb > -log10(0.05) ) * 1
+sigtemp[sigtemp==1] = "*"
+sigtemp[sigtemp==0] = ""
+sigtemp2 = matrix(paste(count.comb, sigtemp), ncol=6 )
+
+
+pdf("fig3.panelB.common.overlaps.pdf")
+heatmap.3(mat.comb, col=cols, Rowv=F, Colv=F, cellnote=sigtemp2, notecol="black", notecex=2 )
+dev.off()
+
+save(mat.comb, sigtemp2, file="fig3.panelB.Rdata")
+
+#### Panel C
+load("analysis/fdr_calcs.genes.up.Rdata")
+fdrs.up = fdrs
+load("analysis/fdr_calcs.genes.down.Rdata")
+fdrs.down= fdrs
+load("taf1.DE.Rdata")
+recur.d = rowSums(genes.down)
+recur.u = rowSums(genes.up)
+cols.rec  =c(magma(5)[2], "deeppink4", "darkcyan" )
+
+
+pdf("fig3.panelC.hist.pdf")
+hist( recur.u[recur.u>0]+0.01 ,    col=cols.rec[2], main="Recurrence, up", xlab="Count",xlim=c(1,4))
+abline( v = fdrs.up$Pt)
+hist( recur.d[recur.d>0]+0.01 ,    col=cols.rec[3], main="Recurrence, down", xlab="Count",xlim=c(1,4))
+abline( v = fdrs.down$Pt)
+dev.off()
+
+save( recur.u ,recur.d, fdrs.down, fdrs.up, file="fig3.panelC.Rdata")
+
+
+#### Panel D
+*** TO DO
+
+
+#################
+###  Figure 5 ###
+#################
+
+#### Panel A
+load("1adj.tally_75.subnet.down1000.Rdata")
+n.coexp = subnet[1:100,1:100]
+medK = 0.28
+filtMin=6
+temp = n.coexp
+temp[temp >medK] = 1
+temp[temp <= medK] = 0
+consTree = hclust(as.dist(temp), method = "average");
+consDend = as.dendrogram(consTree)
+unmergedLabels3 = cutreeDynamic(dendro = consTree, distM = temp, deepSplit = 2, cutHeight = 0.995, minClusterSize = 2, pamRespectsDendro = FALSE );
+nsclust = as.numeric(unmergedLabels3)+1
+unmergedColors3 = magma( max(nsclust))[nsclust]
+n.coexp = 1-n.coexp
+
+pdf("fig5.panelA.heatmap.f1.pdf")
+heatmap.2(n.coexp, col=viridis(100), density="none", trace="none", Rowv=consDend, Colv=consDend, RowSideColors=unmergedColors3, ColSideColors=unmergedColors3,cexRow=0.5, cexCol=0.5, main="Downregulated genes")
+dev.off()
+save(n.coexp, consDend, unmergedColors3 , file="fig5.panelA.Rdata")
+
+#### Panel B
+
+#### Panel C
+
+#### Panel D
+
+
+
+#################
+###  Figure 6 ###
+#################
+*** TO DO
+

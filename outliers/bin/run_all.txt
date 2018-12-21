@@ -1,0 +1,173 @@
+load("gene_annotations_v22.Rdata")
+load("freq.75.net.Rdata")
+network = make_net_mat(data,n,genes[,2], filt)
+nettype = "tally75"
+# clean up 
+rm(data)
+
+# note, genes are gene names HUGO ids
+# you can convert them if you wish to entrezIDs
+
+ # load disorder, eg
+ disease = "pd"
+ filedir = "PD"
+ load("../other_diseases/PD/pd.DE.Rdata")
+
+# see other file
+f1.up = data_fc >= 1
+f1.down = data_fc <= -1
+q1  = data_padj <= 0.05
+genes.up = f1.up & q1
+genes.down = f1.down & q1
+fg2 = (rowSums(data_fc!=0) >0 )
+
+
+
+# set up gene sets to extract network
+# since genes.up and genes.down are from the same data the filtering indices are the same
+
+subgenesets.d = (genes.down[fg, ] *1)
+subgenesets.u = (genes.up[fg, ] *1)
+
+
+res.up = run_filtering( subgenesets.u, "up", network, outputflag=T )
+res.down =run_filtering( subgenesets.d, "down", network, outputflag=T )
+
+
+
+
+
+# helper functions 
+
+filter_coexp_median <- function(n.coexp, runid, filtMin=6, medK=0.28, FLAG_PLOT=FALSE){
+        temp = n.coexp
+        temp[temp >medK] = 1
+	temp[temp <= medK] = 0
+
+	consTree = hclust(as.dist(temp), method = "average");
+	consDend = as.dendrogram(consTree)
+	unmergedLabels3 = cutreeDynamic(dendro = consTree, distM = temp, deepSplit = 2, cutHeight = 0.995, minClusterSize = 2, pamRespectsDendro = FALSE );
+        nsclust = as.numeric(unmergedLabels3)+1
+	unmergedColors3 = magma( max(nsclust))[nsclust]
+        if( FLAG_PLOT == TRUE) {
+	    heatmap.2(temp, density="none", trace="none", col=cols, Rowv=consDend, Colv=consDend, RowSideColors=unmergedColors3, ColSideColors=unmergedColors3,cexRow=0.5, cexCol=0.5, main=runid)
+            heatmap.2(n.coexp, density="none", trace="none", col=cols, Rowv=consDend, Colv=consDend, RowSideColors=unmergedColors3, ColSideColors=unmergedColors3,cexRow=0.5, cexCol=0.5, main=runid)
+        }
+	i.prev = ""
+	ki = 1
+	ji = 0
+	unmergedLabels.mod = as.numeric(unmergedLabels3[consTree$order]) * 0
+	for( ii in as.numeric(unmergedLabels3[consTree$order]) ){
+	   if( ii == i.prev){
+	       unmergedLabels.mod[ki] = ji
+	    } else {
+	        i.prev = ii
+	        ji = ji + 1
+	        unmergedLabels.mod[ki] = ji
+
+	    }
+	    ki = ki + 1
+	}
+
+	f.freq = count(unmergedLabels.mod)[,2] < filtMin
+	f.keep = count(unmergedLabels.mod)[f.freq,1]
+	unmergedLabels.mod2 = unmergedLabels.mod[order(consTree$order)]
+	m = match( unmergedLabels.mod2, f.keep)
+	f.fm = !is.na(m)
+	# deg.filt.list[[i]] = f.fm
+ 	if( FLAG_PLOT == TRUE & sum(f.fm) > 0) { heatmap.2(n.coexp[f.fm,f.fm], density="none", trace="none", cexRow=0.5, cexCol=0.5, main=runid) }
+	return(f.fm)
+}
+
+calc_fdrs_recur  <- function( data, pp = 0.05) {
+
+        temp1 = lapply(1:1000, function(i) shuffle_cols(data) )
+        temp2 = sapply(1:1000, function(i) rowSums(temp1[[i]], na.rm=T))
+        
+        nmax = dim(data)[2] + 1
+
+        recur = rowSums(data, na.rm=T)
+        ob =  count_recur( as.matrix(recur) , nmax)
+        ex = rowSums(sapply(1:1000, function(j) count_recur( as.matrix(temp2[,j] ), nmax ) ) )/1000
+
+        test = cbind( ob, ex)
+
+        observed = cbind( (rev(cumsum(rev(test[,1])))), 0:(nmax-1))
+        expected = cbind( (rev(cumsum(rev(test[,2])))), 0:(nmax-1))
+
+        FDR = expected[,1]/observed[,1]
+        Pt = expected[ min(which(FDR < pp ) ), 2]
+        sig = sum(test[  (which(FDR < pp )) ,1], na.rm=T)
+        res = list(FDR, test, Pt, sig, pp)
+        names(res) = c("FDR", "test", "Pt", "sig", "pp")
+        return( res )
+}
+
+
+count_recur <- function(data,nmax){
+      freq = count(data[,1])
+      res = matrix(0, nrow=nmax, ncol=1 )
+      rownames(res) = 0:(nmax-1)
+      m = match(0:(nmax-1), freq[,1])
+      f.r = !is.na(m)
+      f.f = m[f.r]
+      res[f.r,1] = freq[f.f,2]
+      return(res)
+}
+
+
+shuffle_cols <- function( data ) {
+     nc = dim(data)[2]
+     nr = dim(data)[1]
+     return (sapply(1:nc, function(i) data[sample(nr),i] ))
+}
+
+
+
+require(dynamicTreeCut)
+### filter common coExp
+run_filtering <- function( subgenesets, flag, net, outputflag=T){
+
+      m = match( rownames(network), rownames(subgenesets) )
+      f.n = !is.na(m)
+      f.ee = m[f.n]
+
+      net  = net[f.n,f.n]
+      subgenesets = subgenesets[f.ee,]
+      subgenesets.filt = subgenesets*0
+
+      res.prec = list()
+      n = dim(subgenesets)[2]
+
+       for(i in 1:n ){
+            f.sub =  subgenesets[,i]==1
+            subnet = net[f.sub,f.sub]
+            genes.sub = subgenesets[f.sub,i]
+            #save( subnet, f.sub, genes.sub, file= paste(colnames(subgenesets)[i], nettype, flag,"subnet.Rdata",sep=".") )
+            n = dim(subnet)[1]
+            if( length(n) == 0 ) { print(n); next; }
+            tempfilt =  filter_coexp_median(subnet, colnames(subgenesets)[i])
+            tempfilt2 = rep(0,n)
+            tempfilt2[tempfilt] = 1:sum(tempfilt)
+            names(tempfilt2) = rownames(subnet)
+            res.prec[[i]] = tempfilt2
+            m = match( names(which(res.prec[[i]]>0)), rownames(subgenesets))
+            subgenesets.filt[m,i] = 1
+      }
+
+      pre.post = cbind(colSums(subgenesets), colSums(subgenesets.filt))
+      recur.filt = rowSums(subgenesets.filt)
+      recur      = rowSums(subgenesets)
+      fdrs = calc_fdrs_recur( subgenesets )
+      fdrs.filt = calc_fdrs_recur( subgenesets.filt )
+      if(outputflag==T){
+            save(res.prec, file=paste(disease,"res.prec", flag, "Rdata", sep="."))
+            save(fdrs.filt, subgenesets.filt, file=paste("fdr_calcs", flag, "Rdata", sep="."))
+            save(fdrs.filt, subgenesets.filt, file=paste("fdr_calcs.filt", flag, "Rdata", sep="."))
+            save(recur, recur.filt, subgenesets.filt, subgenesets, pre.post, file=paste(disease,"recur.filt.genes", flag, "Rdata", sep="."))
+      }
+      return( list(recur, recur.filt,fdrs, fdrs.filt, subgenesets, subgenesets.filt, pre.post))
+}
+
+
+
