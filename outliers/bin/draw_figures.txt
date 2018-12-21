@@ -169,15 +169,142 @@ dev.off()
 save(n.coexp, consDend, unmergedColors3 , file="fig5.panelA.Rdata")
 
 #### Panel B
+load("analysis/taf.recur.filt.up.genes.Rdata")
+load("analysis/taf.recur.filt.down.genes.Rdata")
+recurs = cbind( recur.u*0, recur.u*0, recur.u, recur.u.filt, recur.d , recur.d.filt)
+load("analysis/fdr_calcs.filt.genes.down.Rdata")
+load("analysis/fdr_calcs.filt.genes.up.Rdata")
+fdrs.up.filt = fdrs.up
+fdrs.down.filt = fdrs.down
+load("fdr_calcs.genes.down.Rdata")
+load("fdr_calcs.genes.up.Rdata")
+pt.all = cbind(0,0, fdrs.up$Pt,fdrs.up.filt$Pt , fdrs.down$Pt, fdrs.down.filt$Pt)
+
+
+
+temp1 = recurs[,c(4,3)]
+temp = plyr::count( temp1)
+temp.mat = spread(temp, key=x.recur.u.filt, value=freq)
+rownames(temp.mat) = temp.mat[,1]
+temp.mat = temp.mat[,-1]
+temp.mat[is.na(temp.mat)] = 0
+temp.mat = as.matrix(temp.mat )
+
+temp.mat10 =   log10(temp.mat )  + 1
+temp.mat10[!is.finite(temp.mat10)] = 0
+Pt.pre = pt.all[3]
+Pt.post = pt.all[4]
+
+
+pdf("fig5.panelB.up.pdf")
+image(  temp.mat10, col=cols11, axes=F, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering" )
+n=dim( temp.mat)[2] -1
+ni = diff((0:n/n))[1]
+abline( h= (0:n/n)[Pt.post]+ni/2, lwd=3, col="grey")
+axis(2, at=0:n/n, lab=0:n)
+n=dim( temp.mat)[1] -1
+ni = diff((0:n/n))[1]
+axis(1, at=0:n/n, lab=(0:n)  )
+abline( v= (0:n/n)[Pt.pre]+ni/2, lwd=3, col="grey")
+heatmap.3(temp.mat10, col=cols11)
+dev.off()
+
+
+temp1 = recurs[,c(6,5)]
+temp = plyr::count( temp1)
+temp.mat = spread(temp, key=x.recur.d.filt, value=freq)
+rownames(temp.mat) = temp.mat[,1]
+temp.mat = temp.mat[,-1]
+temp.mat[is.na(temp.mat)] = 0
+temp.mat = as.matrix(temp.mat )
+
+temp.mat10 =   log10(temp.mat )  + 1
+temp.mat10[!is.finite(temp.mat10)] = 0
+Pt.pre = pt.all[5]
+Pt.post = pt.all[6]
+
+pdf("fig5.panelB.down.pdf")
+image(  temp.mat10, col=cols11, axes=F, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering" )
+n=dim( temp.mat)[2] -1
+ni = diff((0:n/n))[1]
+abline( h= (0:n/n)[Pt.post]+ni/2, lwd=3, col="grey")
+axis(2, at=0:n/n, lab=0:n)
+n=dim( temp.mat)[1] -1
+ni = diff((0:n/n))[1]
+axis(1, at=0:n/n, lab=(0:n)  )
+abline( v= (0:n/n)[Pt.pre]+ni/2, lwd=3, col="grey")
+heatmap.3(temp.mat10, col=cols11)
+dev.off()
+
 
 #### Panel C
 
-#### Panel D
-
-
+ 
 
 #################
 ###  Figure 6 ###
 #################
-*** TO DO
+#### Panel A
 
+#### Panel B
+
+#### Panel C
+
+ 
+# for each disease: 
+temp1 = recurs[,c(4,3)]
+temp = plyr::count( temp1)
+temp.mat = spread(temp, key=x.recur.u.filt, value=freq)
+rownames(temp.mat) = temp.mat[,1]
+temp.mat = temp.mat[,-1]
+temp.mat[is.na(temp.mat)] = 0
+temp.mat = as.matrix(temp.mat )
+
+temp.mat10 =   log10(temp.mat )  + 1
+temp.mat10[!is.finite(temp.mat10)] = 0
+Pt.pre = pt.all[3]
+Pt.post = pt.all[4]
+
+
+pdf("pre.post.filter.recur.up.pdf")
+image(  temp.mat10, col=cols11, axes=F, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering" )
+n=dim( temp.mat)[2] -1
+ni = diff((0:n/n))[1]
+abline( h= (0:n/n)[Pt.post]+ni/2, lwd=3, col="grey")
+axis(2, at=0:n/n, lab=0:n)
+n=dim( temp.mat)[1] -1
+ni = diff((0:n/n))[1]
+axis(1, at=0:n/n, lab=(0:n)  )
+abline( v= (0:n/n)[Pt.pre]+ni/2, lwd=3, col="grey")
+heatmap.3(temp.mat10, col=cols11)
+dev.off()
+
+
+temp1 = recurs[,c(6,5)]
+temp = plyr::count( temp1)
+temp.mat = spread(temp, key=x.recur.d.filt, value=freq)
+rownames(temp.mat) = temp.mat[,1]
+temp.mat = temp.mat[,-1]
+temp.mat[is.na(temp.mat)] = 0
+temp.mat = as.matrix(temp.mat )
+
+temp.mat10 =   log10(temp.mat )  + 1
+temp.mat10[!is.finite(temp.mat10)] = 0
+Pt.pre = pt.all[5]
+Pt.post = pt.all[6]
+
+pdf("pre.post.filter.recur.down.pdf")
+image(  temp.mat10, col=cols11, axes=F, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering" )
+n=dim( temp.mat)[2] -1
+ni = diff((0:n/n))[1]
+abline( h= (0:n/n)[Pt.post]+ni/2, lwd=3, col="grey")
+axis(2, at=0:n/n, lab=0:n)
+n=dim( temp.mat)[1] -1
+ni = diff((0:n/n))[1]
+axis(1, at=0:n/n, lab=(0:n)  )
+abline( v= (0:n/n)[Pt.pre]+ni/2, lwd=3, col="grey")
+heatmap.3(temp.mat10, col=cols11)
+
+dev.off()
+
+ 
