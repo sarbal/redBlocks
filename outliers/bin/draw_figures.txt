@@ -219,10 +219,32 @@ dev.off()
 #### Panel C
 load("../figures/fig5.panelC.Rdata")
 pdf("../figures/fig5.panelC.pdf")
-
-
+plot_de_range(counts_sig.pre.down, counts_sig.post.down, cols.rec[3], ylim=c(0,15), xlim=c(10,200) )
+plot_de_range(counts_sig.pre.up, counts_sig.post.up, cols.rec[2], ylim=c(0,15), xlim=c(10,200) )
 dev.off()
 
+
+
+cols.rec  =c(magma(5)[2], "deeppink4", "darkcyan" )
+plot_de_range <- function( counts.pre, counts.post, col, ...){
+        #  yrange = range( cbind(colMeans(counts.pre)+colSD(counts.pre), colMeans(counts.pre)-colSD(counts.pre),
+        #                        colMeans(counts.post)+colSD(counts.post), colMeans(counts.post)-colSD(counts.post) ))
+          X_c = 10:1000
+          Y_c = colMeans(counts.pre)
+          std_Y_c = colSD(counts.pre)
+
+          plot(X_c, Y_c, lwd=2, col=col,   type="l", ... )
+          polygon(c(X_c, rev(X_c)), c(Y_c - std_Y_c, rev(Y_c + std_Y_c)), col = "lightgrey", border = NA)
+          lines(X_c, Y_c, lwd=2, col=col)
+
+          Y_c = colMeans(counts.post)
+          std_Y_c = colSD(counts.post)
+          polygon(c(X_c, rev(X_c)), c(Y_c - std_Y_c, rev(Y_c + std_Y_c)), col = makeTransparent(col), border = NA)
+          lines(X_c, Y_c, lwd=2, col=col)
+
+          
+
+}
 
 
 
