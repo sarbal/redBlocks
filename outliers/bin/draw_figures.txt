@@ -111,6 +111,38 @@ save( recur.u ,recur.d, fdrs.down, fdrs.up, file="fig3.panelC.Rdata")
 #### Panel D
 *** TO DO
 
+#################
+###  Figure 4 ###
+#################
+#### Panel A
+load("analysis/fdr_calcs.goslim.paths.all.Rdata")
+load("analysis/summary.goslim.paths.Rdata")
+load("analysis/summary.goslim.paths.recurs.Rdata")
+load("analysis/goslim.summary2genes.Rdata")
+pdf("fig4.panelA.pdf")
+dev.off()
+
+save(up.path, down.path, file="fig4.panelA.Rdata")
+#### Panel B
+pdf("fig4.panelB.pdf")
+dev.off()
+save(recur.up.path,  fdrs.up , file="fig4.panelA.Rdata")
+
+#### Panel C
+pdf("fig4.panelC.pdf")
+dev.off()
+save(recur.up.path,  fdrs.up , file="fig4.panelC.Rdata")
+
+#### Panel D
+pdf("fig4.panelD.pdf")
+dev.off()
+save( file="fig4.panelD.Rdata")
+
+#### Panel E
+pdf("fig4.panelD.pdf")
+dev.off()
+save( , file="fig4.panelE.Rdata")
+
 
 #################
 ###  Figure 5 ###
