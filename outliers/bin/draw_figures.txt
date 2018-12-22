@@ -143,36 +143,145 @@ save(p.tests.down, p.tests.up,n.sig.rec.down, n.sig.rec.up ,p.max ,xrange , plot
 #################
 #### Panel A
 
+load("../figures/fig4.panelA.Rdata")
 pdf("../figures/fig4.panelA.pdf")
+plot_enrich_res(padj.up, col.size)
+plot_enrich_res(padj.down, col.size)
 dev.off()
 
-save(up.path, down.path, file="fig4.panelA.Rdata")
 
 #### Panel B
+load("../figures/fig4.panelB.Rdata")
 pdf("../figures/fig4.panelB.pdf")
+hist( recur.up.path[recur.up.path>0]+0.01 , col=cols.rec[2], main="Recurrence, up", xlab="Recurrence of GO group",xlim=c(1,4))
+abline( v = Pt.up, lwd=2, col="lightgrey")
 dev.off()
-save(recur.up.path,  fdrs.up , file="../figures/fig4.panelA.Rdata")
+
 
 #### Panel C
+load("../figures/fig4.panelC.Rdata")
 pdf("../figures/fig4.panelC.pdf")
+pheatmap()
 dev.off()
-save(recur.up.path,  fdrs.up , file="../figures/fig4.panelC.Rdata")
+
+
 
 #### Panel D
+load("../figures/fig4.panelD.Rdata")
 pdf("../figures/fig4.panelD.pdf")
+hist( recur.down.path[recur.down.path>0]+0.01 , col=cols.rec[3], main="Recurrence, down", xlab="Recurrence of GO group",xlim=c(1,4))
+abline( v = Pt.down, lwd=2, col="lightgrey")
 dev.off()
-save( file="../figures/fig4.panelD.Rdata")
+
 
 #### Panel E
-pdf("../figures/fig4.panelD.pdf")
-dev.off()
-save( , file="../figures/fig4.panelE.Rdata")
+load("../figures/fig4.panelE.Rdata")
+pdf("../figures/fig4.panelE.pdf")
+dev.off() 
+
+
+
 
 # To reproduce analysis:
 load("analysis/fdr_calcs.goslim.paths.all.Rdata")
 load("analysis/summary.goslim.paths.Rdata")
 load("analysis/summary.goslim.paths.recurs.Rdata")
 load("analysis/goslim.summary2genes.Rdata")
+load("analysis/goslim.enrich.all.Rdata")
+
+fcc = c(1:3,6,5,4)
+col.size = go.slim[ff,3]
+padj.up = apply(pvals.up[ff,fcc],2, p.adjust)
+rownames(padj.up) = go.slim[ff,1]
+padj.down = apply(pvals.down[ff,fcc],2, p.adjust)
+rownames(padj.down) = go.slim[ff,1]
+save(padj.down, padj.up,plot_enrich_res,col.size,ff,go.slim, cols4b, file="../figures/fig4.panelA.Rdata")
+
+recur.up.path = recurs.paths[,2]
+Pt.up = pt.p.all[[2]]
+save(recur.up.path,  Pt.up , cols.rec, file="../figures/fig4.panelB.Rdata")
+recur.down.path = recurs.paths[,3]
+Pt.down = pt.p.all[[3]]
+save(recur.down.path,  Pt.down , cols.rec, file="../figures/fig4.panelD.Rdata")
+
+plot_enrich_res <- function(padj.res, col.size,  p=0.05  ){
+   f = rowSums( 1* (padj.res < p )) > 0
+   sigtemp = (padj.res < p) * 1
+   sigtemp[sigtemp==1] = "*"
+   sigtemp[sigtemp==0] = ""
+   recur.p = rowSums(padj.res < p)
+   recur.col = c(0,rev(magma(6)))[recur.p+1]
+   cols4b = colorpanel(5000, "lightgrey", "blue", "darkblue")
+   o = order(go.slim[ff,3][f] )
+   heatmap.3( -log10(padj.res[f,][o,]), Colv=F, Rowv=F, RowSideColors = recur.col[f][o], col=cols9,cexRow = 0.7, cellnote=sigtemp[f,][o,], notecol="black", notecex=2 )
+   heatmap.3( -log10(padj.res[f,][o,]), Colv=F, Rowv=F, RowSideColors = cols4b[col.size][f][o], col=cols9,cexRow = 0.7, cellnote=sigtemp[f,][o,], notecol="black", notecex=2 )
+}
+
+
+
+
+pdf("figpathways_updated2.pdf")
+heatmap.3( -log10(go.up[fu,][ou,]), Colv=F,  Rowv=F, col=cols9,cexRow = 0.7, RowSideColors = cols4b[col.size][fu][ou], cellnote=sigtemp.up[fu,][ou,], notecol="black", notecex=2 )
+heatmap.3( -log10(go.down[fd,][od,]), Colv=F,  Rowv=F,  col=cols9,cexRow = 0.7, RowSideColors = cols4b[col.size][fd][od], cellnote=sigtemp.down[fd,][od,], notecol="black", notecex=2 )
+heatmap.3( -log10(go.up[fu,][ou,]), Colv=F,  Rowv=F, col=cols9,cexRow = 0.7, RowSideColors = recur.up.col[fu][ou], cellnote=sigtemp.up[fu,][ou,], notecol="black", notecex=2 )
+heatmap.3( -log10(go.down[fd,][od,]), Colv=F,  Rowv=F,  col=cols9,cexRow = 0.7, RowSideColors = recur.down.col[fd][od], cellnote=sigtemp.down[fd,][od,], notecol="black", notecex=2 )
+heatmap.3( cbind(col.size ,col.size ) , col=unique(cols4b))
+dev.off()
+
+
+
+load("Y:/human/RNAseq/outliers/TAF1/goslim.enrich.recur.Rdata")
+ff = go.slim[,3] >=5 & go.slim[,3] <= 4800
+
+recsigd =  which(padj.recur.down[ff,2] <0.05)
+recsigu =  which(padj.recur.up[ff,2] <0.05)
+sigrecu = which(recur.pu>=3)
+sigrecd = which(recur.pd>=3)
+fo = c(1,2,3,6,5,4)
+
+pdf("figpathredo.pdf")
+load("temp2slim.Rdata")
+library(pheatmap)
+f11 = order(gene.mat2[,1] ,gene.mat2[,2], gene.mat2[,3], gene.mat2[,6], gene.mat2[,5], gene.mat2[,4] )
+gene.mat2 = gene.mat2[f11,]
+gene.mat = gene.mat[f11,]
+m = match(rownames(gene.mat), rownames(annot.sub) )
+o1 = order(annot.sub[m,1] )
+o2 = order(annot.sub[m,2] )
+o3 = order(annot.sub[m,3] )
+o = o1
+rec2 = rowSums(gene.mat2)
+row_df = data.frame( cbind(annot.sub[m,][o,] + 1 , rec2[o]))
+row_df[,1] = as.factor(row_df[,1])
+row_df[,2] = as.factor(row_df[,2])
+row_df[,3] = as.factor(row_df[,3])
+row_df[,4] = as.factor(row_df[,4])
+
+rownames(row_df) = rownames(gene.mat2[o,])
+pheatmap((gene.mat2[o,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
+
+load("temp4slim.Rdata")
+f11 = order(gene.mat2[,1] ,gene.mat2[,2], gene.mat2[,3], gene.mat2[,6], gene.mat2[,5], gene.mat2[,4] )
+#o = order( -rowSums(gene.mat2))
+gene.mat2 = gene.mat2[f11,]
+gene.mat = gene.mat[f11,]
+m = match(rownames(gene.mat), rownames(annot.sub) )
+o1 = order(annot.sub[m,1] )
+o2 = order(annot.sub[m,2] )
+rec2 = rowSums(gene.mat2)
+row_df = data.frame(cbind(annot.sub[m,][o1,] + 1 , rec2[o1]))
+row_df[,1] = as.factor(row_df[,1])
+row_df[,2] = as.factor(row_df[,2])
+row_df[,3] = as.factor(row_df[,3])
+
+rownames(row_df) = rownames(gene.mat2[o1,])
+pheatmap((gene.mat2[o1,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
+
+dev.off()
+
+
+
+
 
 
 #################
@@ -338,127 +447,6 @@ plot_2D_hist <- function(mat,pt.x, pt.y, ...){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Figure 4
-
-load("go.slim.Rdata")
-load("goslim.enrich.Rdata")
-k = 91
-go.down = sapply(1:6, function(i) go.pre.down2[[i]][,91] )
-go.up = sapply(1:6, function(i) go.pre.up2[[i]][,91] )
-ff = go.slim[,3] >= 5  & go.slim[,3] <= 4800
-rownames(go.up) = (go.slim[ff,1])
-rownames(go.down) = (go.slim[ff,1])
-colnames(go.up) = 1:6
-colnames(go.down) = 1:6
-
-
-fu = rowSums( 1* (go.up < 0.05 )) > 0
-fd = rowSums( 1* (go.down < 0.05 )) > 0
-
-sigtemp.up= (go.up[,] < 0.05) * 1
-sigtemp.up[sigtemp.up==1] = "*"
-sigtemp.up[sigtemp.up==0] = ""
-
-sigtemp.down= (go.down[,] < 0.05) * 1
-sigtemp.down[sigtemp.down==1] = "*"
-sigtemp.down[sigtemp.down==0] = ""
-
-heatmap.3( -log10(go.up), Colv=F, Rowv=F, col=cols9,cexRow = 0.7, cellnote=sigtemp.up, notecol="black", notecex=2 )
-heatmap.3( -log10(go.down), Colv=F, Rowv=F, col=cols9,cexRow = 0.7,  cellnote=sigtemp.down, notecol="black", notecex=2 )
-
-recur.pu = rowSums(go.up<0.05)
-recur.pd = rowSums(go.down<0.05)
-
-recur.up.col = c(0,rev(magma(6)))[recur.pu+1]
-recur.down.col = c(0,rev(magma(6)))[recur.pd+1]
-
-cols4b = colorpanel(5000, "lightgrey", "blue", "darkblue")
-
-col.size = go.slim[ff,3]
-
-o = order(go.slim[ff,3] )
-
-ou = order(go.slim[ff,3][fu] )
-od = order(go.slim[ff,3][fd] )
-
-pdf("figpathways_updated2.pdf")
-heatmap.3( -log10(go.up[fu,][ou,]), Colv=F,  Rowv=F, col=cols9,cexRow = 0.7, RowSideColors = cols4b[col.size][fu][ou], cellnote=sigtemp.up[fu,][ou,], notecol="black", notecex=2 )
-heatmap.3( -log10(go.down[fd,][od,]), Colv=F,  Rowv=F,  col=cols9,cexRow = 0.7, RowSideColors = cols4b[col.size][fd][od], cellnote=sigtemp.down[fd,][od,], notecol="black", notecex=2 )
-heatmap.3( -log10(go.up[fu,][ou,]), Colv=F,  Rowv=F, col=cols9,cexRow = 0.7, RowSideColors = recur.up.col[fu][ou], cellnote=sigtemp.up[fu,][ou,], notecol="black", notecex=2 )
-heatmap.3( -log10(go.down[fd,][od,]), Colv=F,  Rowv=F,  col=cols9,cexRow = 0.7, RowSideColors = recur.down.col[fd][od], cellnote=sigtemp.down[fd,][od,], notecol="black", notecex=2 )
-heatmap.3( cbind(col.size ,col.size ) , col=unique(cols4b))
-dev.off()
-
-
-
-load("Y:/human/RNAseq/outliers/TAF1/goslim.enrich.recur.Rdata")
-ff = go.slim[,3] >=5 & go.slim[,3] <= 4800
-
-recsigd =  which(padj.recur.down[ff,2] <0.05)
-recsigu =  which(padj.recur.up[ff,2] <0.05)
-sigrecu = which(recur.pu>=3)
-sigrecd = which(recur.pd>=3)
-fo = c(1,2,3,6,5,4)
-
-pdf("figpathredo.pdf")
-load("temp2slim.Rdata")
-library(pheatmap)
-f11 = order(gene.mat2[,1] ,gene.mat2[,2], gene.mat2[,3], gene.mat2[,6], gene.mat2[,5], gene.mat2[,4] )
-gene.mat2 = gene.mat2[f11,]
-gene.mat = gene.mat[f11,]
-m = match(rownames(gene.mat), rownames(annot.sub) )
-o1 = order(annot.sub[m,1] )
-o2 = order(annot.sub[m,2] )
-o3 = order(annot.sub[m,3] )
-o = o1
-rec2 = rowSums(gene.mat2)
-row_df = data.frame( cbind(annot.sub[m,][o,] + 1 , rec2[o]))
-row_df[,1] = as.factor(row_df[,1])
-row_df[,2] = as.factor(row_df[,2])
-row_df[,3] = as.factor(row_df[,3])
-row_df[,4] = as.factor(row_df[,4])
-
-rownames(row_df) = rownames(gene.mat2[o,])
-pheatmap((gene.mat2[o,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
-
-load("temp4slim.Rdata")
-f11 = order(gene.mat2[,1] ,gene.mat2[,2], gene.mat2[,3], gene.mat2[,6], gene.mat2[,5], gene.mat2[,4] )
-#o = order( -rowSums(gene.mat2))
-gene.mat2 = gene.mat2[f11,]
-gene.mat = gene.mat[f11,]
-m = match(rownames(gene.mat), rownames(annot.sub) )
-o1 = order(annot.sub[m,1] )
-o2 = order(annot.sub[m,2] )
-rec2 = rowSums(gene.mat2)
-row_df = data.frame(cbind(annot.sub[m,][o1,] + 1 , rec2[o1]))
-row_df[,1] = as.factor(row_df[,1])
-row_df[,2] = as.factor(row_df[,2])
-row_df[,3] = as.factor(row_df[,3])
-
-rownames(row_df) = rownames(gene.mat2[o1,])
-pheatmap((gene.mat2[o1,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
-
-dev.off()
 
 
 
