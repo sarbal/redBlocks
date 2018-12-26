@@ -1,8 +1,5 @@
 # Plot figures
 source("helper_redBlocks.r")
-require(tidyverse)
-require(plyr)
-require(pheatmap)
 
 #################
 ###  Figure 3 ###
