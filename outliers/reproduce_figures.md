@@ -3,7 +3,7 @@ These are the scripts to draw the manuscript figures.
 Some additional analyses are interspersed throughout but most are pre-run and stored in their respective directories as indicated. 
 
 ## Set up environment 
-source("helper_redBlocks.r")
+source("outliers/bin/helper_redBlocks.r")
 
 ## Figure 3 
 ![fig3](https://github.com/sarbal/redBlocks/blob/master/imgs/figure3_genes.png "Figure 3")
@@ -11,8 +11,8 @@ Caption: Disease expression analysis with a family-based approach. (A) The expre
 
 #### Panel A
 ```{r}
-load("../figures/fig3.panelA.Rdata")
-pdf("../figures/fig3.panelA.gene.recur.pdf")
+load("outliers/figures/fig3.panelA.Rdata")
+pdf("outliers/figures/fig3.panelA.gene.recur.pdf")
 heatmap.3(up.plot, Colv=F, col=rev(viridis(100)), Rowv=F, RowSideCol=rev(magma(6))[up.bar], main="Up")
 heatmap.3(down.plot, Colv=F, col=rev(viridis(100)), Rowv=F, RowSideCol=rev(magma(6))[down.bar], main="Down")
 leg2 = cbind(rev(magma(6)), 1:6)
@@ -21,7 +21,7 @@ legend( "bottom", leg=leg2[,2], col=leg2[,1], lwd=3 )
 dev.off()
 
 # To reproduce analysis:
-load("taf1_pedigrees/summary.deg.Rdata")
+load("outliers/taf1_pedigrees/summary.deg.Rdata")
 fcc = c(7:9,12,11,10)
 all = unique(array(sapply(fcc, function(i) head(order(genesets.fcranks[,i]), n=100 ))  ))
 freq = count(array(sapply(fcc, function(i) head(order(genesets.fcranks[,i]), n=100 ))  ))
@@ -38,19 +38,19 @@ up.plot = 1- (genesets.fcranks[all,fcc][om,]/dim(genesets.fcranks)[1])
 up.bar = freq[m,2][om]
 
 leg2 = cbind(rev(magma(6)), 1:6)
-save( up.plot, down.plot, up.bar, down.bar, leg2, file="../figures/fig3.panelA.Rdata")
+save( up.plot, down.plot, up.bar, down.bar, leg2, file="outliers/figures/fig3.panelA.Rdata")
 ```
 
 #### Panel B
 ```{r}
-load("../figures/fig3.panelB.Rdata")
-pdf("../figures/fig3.panelB.common.overlaps.pdf")
+load("outliers/figures/fig3.panelB.Rdata")
+pdf("outliers/figures/fig3.panelB.common.overlaps.pdf")
 heatmap.3(mat.comb, col=cols, Rowv=F, Colv=F, cellnote=sigtemp2, notecol="black", notecex=2 )
 dev.off()
 
 # To reproduce analysis:
-load("taf1_pedigrees/summary.deg.Rdata")
-load("taf1_pedigrees/taf1.DE.Rdata")
+load("outliers/taf1_pedigrees/summary.deg.Rdata")
+load("outliers/taf1_pedigrees/taf1.DE.Rdata")
 reorder = c(1:3,6,5,4)
 down100overlaps = sapply(reorder, function(i) sapply(reorder, function(j) length(intersect(which(genes.down[,i]>0), which(genes.down[,j]>0) )) ) )
 up100overlaps = sapply(reorder, function(i) sapply(reorder, function(j)  length(intersect(which(genes.up[,i]>0), which(genes.up[,j]>0) )) ) )
@@ -90,13 +90,13 @@ sigtemp[sigtemp==1] = "*"
 sigtemp[sigtemp==0] = ""
 sigtemp2 = matrix(paste(count.comb, sigtemp), ncol=6 )
 
-save(mat.comb, sigtemp2, file="../figures/fig3.panelB.Rdata")
+save(mat.comb, sigtemp2, file="outliers/figures/fig3.panelB.Rdata")
 ```
 
 #### Panel C
 ```{r} 
-load("../figures/fig3.panelC.Rdata")
-pdf("../figures/fig3.panelC.hist.pdf")
+load("outliers/figures/fig3.panelC.Rdata")
+pdf("outliers/figures/fig3.panelC.hist.pdf")
 hist( recur.u[recur.u>0]+0.01 , col=cols.rec[2], main="Recurrence, up", xlab="Count",xlim=c(1,4))
 abline( v = fdrs.up$Pt)
 hist( recur.d[recur.d>0]+0.01 , col=cols.rec[3], main="Recurrence, down", xlab="Count",xlim=c(1,4))
@@ -104,21 +104,21 @@ abline( v = fdrs.down$Pt)
 dev.off()
 
 # To reproduce analysis:
-load("analysis/fdr_calcs.genes.up.Rdata")
+load("outliers/analysis/fdr_calcs.genes.up.Rdata")
 fdrs.up = fdrs
-load("analysis/fdr_calcs.genes.down.Rdata")
+load("outliers/analysis/fdr_calcs.genes.down.Rdata")
 fdrs.down= fdrs
 load("taf1.DE.Rdata")
 recur.d = rowSums(genes.down)
 recur.u = rowSums(genes.up)
 cols.rec  =c(magma(5)[2], "deeppink4", "darkcyan" )
-save(cols.rec, recur.u ,recur.d, fdrs.down, fdrs.up, file="../figures/fig3.panelC.Rdata")
+save(cols.rec, recur.u ,recur.d, fdrs.down, fdrs.up, file="outliers/figures/fig3.panelC.Rdata")
 ```
 
 #### Panel D
 ```{r} 
-load("../figures/fig3.panelD.Rdata")
-pdf("../figures/fig3.panelD.pdf")
+load("outliers/figures/fig3.panelD.Rdata")
+pdf("outliers/figures/fig3.panelD.pdf")
 plot_recurrence(xrange, n.sig.rec.up, p.tests.up, main="Up", xlab="Number of DE genes", ylab="Number of genes significantly recurrent")
 plot_recurrence(xrange, n.sig.rec.down, p.tests.down,main="Down", xlab="Number of DE genes", ylab="Number of genes significantly recurrent")
 dev.off()
@@ -132,7 +132,7 @@ plot_recurrence <- function(xrange, n.sig, p.tests, ...){
       axis(4); mtext("-log10 adjusted P-value of significance threshold",4)
 }
 
-load("../taf1_pedigrees/p.recur.pre.Rdata")
+load("outliers/taf1_pedigrees/p.recur.pre.Rdata")
 xrange = 10:1000
 p.max = 0.05
 n.sig.rec.up = sapply(xrange-9, function(i)  sum(p.recur.up[[i]][p.recur.up[[i]][,2]  <= p.max,3]) )
@@ -140,16 +140,16 @@ n.sig.rec.down = sapply(xrange-9, function(i)  sum(p.recur.down[[i]][p.recur.dow
 p.tests.up = sapply(xrange-9, function(i)   p.recur.up[[i]][p.recur.up[[i]][,2]  <= p.max,2][1] )
 p.tests.down = sapply(xrange-9, function(i) p.recur.down[[i]][p.recur.down[[i]][,2]  <= p.max,2][1])
 
-save(p.tests.down, p.tests.up,n.sig.rec.down, n.sig.rec.up ,p.max ,xrange , plot_recurrence, file="../figures/fig3.panelD.Rdata")
+save(p.tests.down, p.tests.up,n.sig.rec.down, n.sig.rec.up ,p.max ,xrange , plot_recurrence, file="outliers/figures/fig3.panelD.Rdata")
 ```
 
 ## Figure 4 
 ![fig4](https://github.com/sarbal/redBlocks/blob/master/imgs/figure4_pathways.png "Figure 4")
-Caption: Gene set enrichment assessment of TAF1 cohort. (A) Top GO enrichment results for each family for up-, and downregulated genes. Significant terms (FDR < 0.05) are highlighted with an *. (B) The frequency and significance of recurrence of each GO term is plotted for the upregulated genes. (C) Gene-GO membership matrix for the upregulated genes. Each column is a gene, and each row a family. The colored bars below highlight the GO terms that these genes belong to. The signal associated with the recurrent GO terms is distributed across different genes, shown by low overlap across the families. (D) There are no significantly recurrent pathways with the downregulated genes. (E) However, the recurrent genes themselves are enriched for ribosomal pathways (p-adjusted<0.05), as shown in the gene-GO membership matrix. The three RP* genes seem to drive almost all the signal.
+Caption: Gene set enrichment assessment of TAF1 cohort. (A) Top GO enrichment results for each family for up-, and downregulated genes. Significant terms (FDR < 0.05) are highlighted with an asterix. (B) The frequency and significance of recurrence of each GO term is plotted for the upregulated genes. (C) Gene-GO membership matrix for the upregulated genes. Each column is a gene, and each row a family. The colored bars below highlight the GO terms that these genes belong to. The signal associated with the recurrent GO terms is distributed across different genes, shown by low overlap across the families. (D) There are no significantly recurrent pathways with the downregulated genes. (E) However, the recurrent genes themselves are enriched for ribosomal pathways (p-adjusted<0.05), as shown in the gene-GO membership matrix. The three RP* genes seem to drive almost all the signal.
 #### Panel A
 ```{r}
-load("../figures/fig4.panelA.Rdata")
-pdf("../figures/fig4.panelA.pdf")
+load("outliers/figures/fig4.panelA.Rdata")
+pdf("outliers/figures/fig4.panelA.pdf")
 plot_enrich_res(padj.up, col.size)
 plot_enrich_res(padj.down, col.size)
 dev.off()
@@ -157,8 +157,8 @@ dev.off()
 
 #### Panel B
 ```{r}
-load("../figures/fig4.panelB.Rdata")
-pdf("../figures/fig4.panelB.pdf")
+load("outliers/figures/fig4.panelB.Rdata")
+pdf("outliers/figures/fig4.panelB.pdf")
 hist( recur.up.path[recur.up.path>0]+0.01 , col=cols.rec[2], main="Recurrence, up", xlab="Recurrence of GO group",xlim=c(1,4))
 abline( v = Pt.up, lwd=2, col="lightgrey")
 dev.off()
@@ -166,8 +166,8 @@ dev.off()
 
 #### Panel C
 ```{r}
-load("../figures/fig4.panelC.Rdata")
-pdf("../figures/fig4.panelC.pdf")
+load("outliers/figures/fig4.panelC.Rdata")
+pdf("outliers/figures/fig4.panelC.pdf")
 pheatmap((gene.mat2[o,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
 dev.off()
 ```
@@ -175,8 +175,8 @@ dev.off()
 
 #### Panel D
 ```{r}
-load("../figures/fig4.panelD.Rdata")
-pdf("../figures/fig4.panelD.pdf")
+load("outliers/figures/fig4.panelD.Rdata")
+pdf("outliers/figures/fig4.panelD.pdf")
 hist( recur.down.path[recur.down.path>0]+0.01 , col=cols.rec[3], main="Recurrence, down", xlab="Recurrence of GO group",xlim=c(1,4))
 abline( v = Pt.down, lwd=2, col="lightgrey")
 dev.off()
@@ -184,19 +184,19 @@ dev.off()
 
 #### Panel E
 ```{r}
-load("../figures/fig4.panelE.Rdata")
-pdf("../figures/fig4.panelE.pdf")
+load("outliers/figures/fig4.panelE.Rdata")
+pdf("outliers/figures/fig4.panelE.pdf")
 pheatmap((gene.mat2[o1,][f1,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df[f1,], border=NA )
 dev.off()
 ```
 
 ```{r}
 # To reproduce analysis:
-load("analysis/fdr_calcs.goslim.paths.all.Rdata")
-load("analysis/summary.goslim.paths.Rdata")
-load("analysis/summary.goslim.paths.recurs.Rdata")
-load("analysis/goslim.summary2genes.Rdata")
-load("analysis/goslim.enrich.all.Rdata")
+load("outliers/taf1_pedigrees/analysis/fdr_calcs.goslim.paths.all.Rdata")
+load("outliers/taf1_pedigrees/analysis/summary.goslim.paths.Rdata")
+load("outliers/taf1_pedigrees/analysis/summary.goslim.paths.recurs.Rdata")
+load("outliers/taf1_pedigrees/analysis/goslim.summary2genes.Rdata")
+load("outliers/taf1_pedigrees/analysis/goslim.enrich.all.Rdata")
 
 fcc = c(1:3,6,5,4)
 col.size = go.slim[ff,3]
@@ -204,14 +204,14 @@ padj.up = apply(pvals.up[ff,fcc],2, p.adjust)
 rownames(padj.up) = go.slim[ff,1]
 padj.down = apply(pvals.down[ff,fcc],2, p.adjust)
 rownames(padj.down) = go.slim[ff,1]
-save(padj.down, padj.up,plot_enrich_res,col.size,ff,go.slim, cols4b, file="../figures/fig4.panelA.Rdata")
+save(padj.down, padj.up,plot_enrich_res,col.size,ff,go.slim, cols4b, file="outliers/figures/fig4.panelA.Rdata")
 
 recur.up.path = recurs.paths[,2]
 Pt.up = pt.p.all[[2]]
-save(recur.up.path,  Pt.up , cols.rec, file="../figures/fig4.panelB.Rdata")
+save(recur.up.path,  Pt.up , cols.rec, file="outliers/figures/fig4.panelB.Rdata")
 recur.down.path = recurs.paths[,3]
 Pt.down = pt.p.all[[3]]
-save(recur.down.path,  Pt.down , cols.rec, file="../figures/fig4.panelD.Rdata")
+save(recur.down.path,  Pt.down , cols.rec, file="outliers/figures/fig4.panelD.Rdata")
 
 plot_enrich_res <- function(padj.res, col.size,  p=0.05  ){
    f = rowSums( 1* (padj.res < p )) > 0
@@ -248,7 +248,7 @@ row_df[,4] = as.factor(row_df[,4])
 
 rownames(row_df) = rownames(gene.mat2[o,])
 pheatmap((gene.mat2[o,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
-save( gene.mat2, o , fo, row_df, file="../figures/fig4.panelC.Rdata")
+save( gene.mat2, o , fo, row_df, file="outliers/figures/fig4.panelC.Rdata")
 
 load("recur4slim.Rdata")
 m = match(rownames(gene.mat), rownames(annot.sub) )
@@ -264,7 +264,7 @@ pheatmap((gene.mat2[o1,][f1,]), col=rev(magma(2)), cluster_rows=F, cluster_cols=
 fo = c(1,2,3,6,5,4)
 pheatmap((gene.mat2[o1,][f1,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df[f1,], border=NA )
 
-save(gene.mat2, o1, f1, fo, row_df , file="../figures/fig4.panelE.Rdata)
+save(gene.mat2, o1, f1, fo, row_df , file="outliers/figures/fig4.panelE.Rdata)
 ```
 
 
@@ -277,16 +277,16 @@ Caption: Co-expression of differentially expressed genes generates enrichment.  
 #### Panel A
 ```{r}
 # To plot panel:
-load("../figures/fig5.panelA2.Rdata")
-load("../figures/fig5.panelA.Rdata")
-pdf("../figures/fig5.panelA.heatmap.f1.pdf")
+load("outliers/figures/fig5.panelA2.Rdata")
+load("outliers/figures/fig5.panelA.Rdata")
+pdf("outliers/figures/fig5.panelA.heatmap.f1.pdf")
 heatmap.2(n.coexp, col=viridis(100), density="none", trace="none", Rowv=consDend, Colv=consDend, RowSideColors=unmergedColors3, ColSideColors=unmergedColors3,cexRow=0.5, cexCol=0.5, main="Downregulated genes")
 heatmap.3( cbind(go.figslim, go.msig), col=cols6, Rowv=consDend, ,Colv=F, RowSideColors=unmergedColors3, ColSideCol =cols4b[c(col.figslim, col.msig)], cexRow=0.5, cexCol=0.5, main="")
 heatmap.3( cbind(go.figslim2, go.msig2), col=cols6, Rowv=consDend, ,Colv=F, RowSideColors=unmergedColors3, ColSideCol =cols4b[c(col.figslim, col.msig)], cexRow=0.5, cexCol=0.5, main="")
 dev.off()
 
 # To reproduce analysis:
-load("taf1_pedigrees/1adj.tally_75.subnet.down1000.Rdata")
+load("outliers/taf1_pedigrees/1adj.tally_75.subnet.down1000.Rdata")
 n.coexp = subnet[1:100,1:100]
 medK = 0.28
 filtMin=6
@@ -299,24 +299,24 @@ unmergedLabels3 = cutreeDynamic(dendro = consTree, distM = temp, deepSplit = 2, 
 nsclust = as.numeric(unmergedLabels3)+1
 unmergedColors3 = magma( max(nsclust))[nsclust]
 n.coexp = 1-n.coexp
-save(n.coexp, consDend, unmergedColors3 , file="../figures/fig5.panelA.Rdata")
+save(n.coexp, consDend, unmergedColors3 , file="outliers/figures/fig5.panelA.Rdata")
 ```
 
 
 #### Panel B
 ```{r}
-load("analysis/summary.gene.recurs.int.Rdata")
-run_recur_compare(recurs,pt.all,  "../figures/fig5.panelB.Rdata")
-load("../figures/fig5.panelB.Rdata")
-pdf("../figures/fig5.panelB.pdf")
+load("outliers/taf1_pedigrees/analysis/summary.gene.recurs.int.Rdata")
+run_recur_compare(recurs,pt.all,  "outliers/figures/fig5.panelB.Rdata")
+load("outliers/figures/fig5.panelB.Rdata")
+pdf("outliers/figures/fig5.panelB.pdf")
 plot_2D_hist (up.mat10, Pt.pre.up, Pt.post.up, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
 plot_2D_hist (down.mat10, Pt.pre.down, Pt.post.down, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
 dev.off()
 ``` 
 #### Panel C
 ```{r}
-load("../figures/fig5.panelC.Rdata")
-pdf("../figures/fig5.panelC.pdf")
+load("outliers/figures/fig5.panelC.Rdata")
+pdf("outliers/figures/fig5.panelC.pdf")
 plot_de_range(counts_sig.pre.down, counts_sig.post.down, cols.rec[3], ylim=c(0,15), xlim=c(10,200) )
 plot_de_range(counts_sig.pre.up, counts_sig.post.up, cols.rec[2], ylim=c(0,15), xlim=c(10,200) )
 dev.off()
@@ -353,16 +353,16 @@ Caption: Differential expression meta-analysis in three other disorders. (A) Rec
 ```{r}
 library(tidyverse)
 library(plyr)
-load("../fig6.panelA.Rdata")
-pdf("../fig6.panelA.pdf")
+load("outliers/figures/fig6.panelA.Rdata")
+pdf("outliers/figures/fig6.panelA.pdf")
 plot_2D_hist (up.mat10, Pt.pre.up, Pt.post.up, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
 plot_2D_hist (down.mat10, Pt.pre.down, Pt.post.down, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
 dev.off()
 ```
 #### Panel B
 ```{r}
-load("../fig6.panelB.Rdata")
-pdf("../fig6.panelB.pdf")
+load("outliers/figures/fig6.panelB.Rdata")
+pdf("outliers/figures/fig6.panelB.pdf")
 plot_2D_hist (up.mat10, Pt.pre.up, Pt.post.up, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
 plot_2D_hist (down.mat10, Pt.pre.down, Pt.post.down, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
 dev.off()
@@ -370,8 +370,8 @@ dev.off()
 
 #### Panel C
 ```{r}
-load("../fig6.panelC.Rdata")
-pdf("../fig6.panelC.pdf")
+load("outliers/figures/fig6.panelC.Rdata")
+pdf("outliers/figures/fig6.panelC.pdf")
 plot_2D_hist (up.mat10, Pt.pre.up, Pt.post.up, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
 plot_2D_hist (down.mat10, Pt.pre.down, Pt.post.down, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
 dev.off()
@@ -381,14 +381,14 @@ dev.off()
 
 ```{r}
 # To reproduce analysis:
-load("../HD/summary.gene.recurs.int.Rdata")
-run_recur_compare(recurs,pt.all, "../fig6.panelA.Rdata")
+load("outliers/other_diseases/HD/summary.gene.recurs.int.Rdata")
+run_recur_compare(recurs,pt.all, "outliers/figures/fig6.panelA.Rdata")
 
-load("../PD/summary.gene.recurs.int.Rdata")
-run_recur_compare(recurs, pt.all, "../fig6.panelB.Rdata")
+load("outliers/other_diseases/PD/summary.gene.recurs.int.Rdata")
+run_recur_compare(recurs, pt.all, "outliers/figures/fig6.panelB.Rdata")
 
-load("../SCZ/summary.gene.recurs.int.Rdata")
-run_recur_compare(recurs,pt.all,  "../fig6.panelC.Rdata")
+load("outliers/other_diseases/SCZ/summary.gene.recurs.int.Rdata")
+run_recur_compare(recurs,pt.all,  "outliers/figures/fig6.panelC.Rdata")
 
 run_recur_compare <- function(recurs, pt.all, filename){
       require(plyr)
