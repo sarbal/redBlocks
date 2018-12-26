@@ -2,7 +2,7 @@
 
 Setup your environment. 
 ```{r echo==FALSE}
-source("helper_redBlocks.r")
+source("outliers/bin/helper_redBlocks.r")
 ```
 
 Load your data. You will need either multiple expression experiments or multiple differentially expressed gene (DEGs) lists. In this example, we will load a set of DEGs from Huntington's disease studies. 
@@ -25,7 +25,7 @@ fdrs.bin = calc_binom_recur(subgenesets)
 hist( recur[recur>0]+0.01 , col=cols.rec[3], main="Recurrence", xlab="Count",xlim=c(1,4))
 abline( v = fdrs$Pt)
 ```
-
+![step1](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/step1.png "gene-level recurrence")
 
 Next, we look for pathway enrichment, and pathway-level recurrence. 
 ```{r}
@@ -48,6 +48,8 @@ sigtemp[sigtemp==0] = ""
 heatmap.3( -log10(paths.padj[f,]), Colv=F, Rowv=F, col=cols9,cexRow = 0.7, cellnote=sigtemp[f,], notecol="black", notecex=2 )
 
 ```
+![step2](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/step2.png "pathway enrichment")
+
 And recurrence of the pathways. 
 ```{r}
 fdrs.paths = calc_fdrs_recur(paths)
@@ -55,6 +57,7 @@ recur.path = rowSums(paths)
 hist( recur.path[recur.path>0]+0.01 , col=cols.rec[3], main="Recurrence", xlab="Count",xlim=c(1,4))
 abline( v = fdrs.paths$Pt)
 ```
+![step3](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/step3.png "pathway-level recurrence")
 
 ```{r}
 genes.sub = subgenesets[recur>0,]
@@ -66,6 +69,9 @@ pheatmap(go.sub)
 pheatmap(genes.sub[f.r,] )
 pheatmap(paths.padj)
 ```
+![step4a](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/step4a.png "GO-gene matrix")
+![step4b](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/step4b.png "Gene-GO matrix")
+![step4c](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/step4c.png "Pathway matrix")
 
 
 We can look at the enrichment of the recurrent genes. 
@@ -78,7 +84,7 @@ rownames(pathsrec.padj) = go.enrich.recur[[1]][,1]
 
 heatmap.3( -log10(pathsrec.padj), Colv=F, Rowv=F, col=cols9,cexRow = 0.7, notecol="black", notecex=2 )
 ```
-
+![step5](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/step5.png "recurrent gene enrichment")
 
 For our last assessment, we look at co-expression as a secondary take at systems-level analyses. 
 ```{r}
@@ -102,6 +108,7 @@ pre.post.mat = recur_mat(recurs)
 plot_2D_hist(pre.post.mat, fdrs$Pt, fdrs.filt$Pt, col=cols11)
 
 ```
+![step6](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/step6.png "pre/post")
 
 
 Finally, we can classify our genes of interest based on the gene-level and pathways-level properties. 
