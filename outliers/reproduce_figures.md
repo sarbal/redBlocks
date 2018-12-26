@@ -6,7 +6,7 @@ Some additional analyses are interspersed throughout but most are pre-run and st
 source("outliers/bin/helper_redBlocks.r")
 
 ## Figure 3 
-![fig3](https://github.com/sarbal/redBlocks/blob/master/imgs/figure3_genes.png "Figure 3")
+![fig3](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/figure3_genes.png "Figure 3")
 Caption: Disease expression analysis with a family-based approach. (A) The expression fold change for each gene is calculated within each family (top 100 up and down regulated genes are shown). (B) Overlaps in DE gene sets between the individual families (numbers in boxes), and the significance of this overlap (colored corresponding to -log10 P-value of the hypergeometric test). Overlaps are mostly small. (C) The replicable genes are those that are recurrent across families. The recurrence distributions for both up- and downregulated genes across the 6 families are shown. Using the binomial test, we find that genes recurring 3 or more times are significant (FDR<0.05). These genes are listed, with 4 up- and 14 downregulated genes significantly recurrent. (D) Robustness assessment of the DE threshold. The plot shows the number of recurrent genes as a function of the number of differentially expressed genes and the significance of the recurrence in grey.
 
 #### Panel A
@@ -144,7 +144,7 @@ save(p.tests.down, p.tests.up,n.sig.rec.down, n.sig.rec.up ,p.max ,xrange , plot
 ```
 
 ## Figure 4 
-![fig4](https://github.com/sarbal/redBlocks/blob/master/imgs/figure4_pathways.png "Figure 4")
+![fig4](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/figure4_pathways.png "Figure 4")
 Caption: Gene set enrichment assessment of TAF1 cohort. (A) Top GO enrichment results for each family for up-, and downregulated genes. Significant terms (FDR < 0.05) are highlighted with an asterix. (B) The frequency and significance of recurrence of each GO term is plotted for the upregulated genes. (C) Gene-GO membership matrix for the upregulated genes. Each column is a gene, and each row a family. The colored bars below highlight the GO terms that these genes belong to. The signal associated with the recurrent GO terms is distributed across different genes, shown by low overlap across the families. (D) There are no significantly recurrent pathways with the downregulated genes. (E) However, the recurrent genes themselves are enriched for ribosomal pathways (p-adjusted<0.05), as shown in the gene-GO membership matrix. The three RP* genes seem to drive almost all the signal.
 #### Panel A
 ```{r}
@@ -270,7 +270,7 @@ save(gene.mat2, o1, f1, fo, row_df , file="outliers/figures/fig4.panelE.Rdata)
 
 
 ## Figure 5 
-![fig5](https://github.com/sarbal/redBlocks/blob/master/imgs/figure5_coexpfilt.png "Figure 5")
+![fig5](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/figure5_coexpfilt.png "Figure 5")
 Caption: Co-expression of differentially expressed genes generates enrichment.  (A) As an example from family 1, we show the co-expression frequency sub-network as a heatmap, where genes showing decreased expression show co-expression. Co-expression blocks define modules as determined by the clustering (see rows). The modules are enriched for particular genes, mainly ribonucleoproteins. Performing a gene set enrichment analysis on these genes (Fisher’s exact test on GO groups), genes (rows) that generate the enrichment (columns are enriched GO terms) almost exclusively overlap with the co-expression blocks. The prominent pathways are ribosome related. (B) The significantly recurrent genes can be divided into those present within co-expression modules (joint) and those not (disjoint). The genes in bold are the functional outliers and the venn diagrams summarizes the number of genes in each category. (C) If we look at the enrichment of these DE gene sets (pre-filtering dark line +/-SD shadow), we see that filtering off the modules removes all but a few significant terms (lighter line, +/-SD shadow).
 
 
@@ -346,7 +346,7 @@ plot_de_range <- function( counts.pre, counts.post, col, ...){
 ```
 
 ## Figure 6 
-![fig6](https://github.com/sarbal/redBlocks/blob/master/imgs/figure6_meta_mod.png "Figure 6")
+![fig6](https://github.com/sarbal/redBlocks/blob/master/outliers/imgs/figure6_meta_mod.png "Figure 6")
 Caption: Differential expression meta-analysis in three other disorders. (A) Recurrence of genes in Huntington’s disease (HD), (B) Parkinson’s disease (PD) and (C) schizophrenia (SCZ), and whether they occur in groups (joint) or not (disjoint). The venn diagrams summarize the number of recurrent genes and their joint or disjoint designation.
 
 #### Panel A
