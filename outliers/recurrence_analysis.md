@@ -1,4 +1,4 @@
-# "Recurrence analysis"
+# Recurrence analysis
 
 Setup your environment. 
 ```{r echo==FALSE}
