@@ -7,7 +7,7 @@ source("outliers/bin/helper_redBlocks.r")
 
 Load your data. You will need either multiple expression experiments or multiple differentially expressed gene (DEGs) lists. In this example, we will load a set of DEGs from Huntington's disease studies. 
 ```{r echo=FALSE}
-load("hd.DE.Rdata")
+load("outliers/figures/hd.DE.Rdata")
 ```
 This file has two large matrices, genes by study, one with downregulated genes, and one with the upregulated genes. We analyze them independently. 
 
@@ -30,7 +30,7 @@ abline( v = fdrs$Pt)
 Next, we look for pathway enrichment, and pathway-level recurrence. 
 ```{r}
 library(EGAD)
-load("goslim.Rdata")
+load("outliers/figures/goslim.Rdata")
 n = dim(subgenesets)[2]
 annotations = make_annotations(GO.human[,c(1,3)], (unique(GO.human[,1])), go.slim[ff,1])
 go.enrich = lapply(1:n, function(i) gene_set_enrichment( names(which(subgenesets[,i]==1)), annotations, go.slim[ff,1:2]))
